@@ -5,6 +5,7 @@ import SignUpPage from './components/SignUpPage'
 import MpinModal from './components/MpinModal'
 import CustomerDashboard from './components/CustomerDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
+import QaTriageDashboard from './components/QaTriageDashboard'
 
 const Icon = ({ name, size = 22 }) => {
   const paths = {
@@ -33,6 +34,7 @@ function HomePage() {
         <button className="menu-button" aria-label="Toggle navigation" onClick={() => setMenu(!menu)}>☰</button>
         <nav className={menu ? 'open' : ''}>{nav.map(x => <a onClick={() => setMenu(false)} href={`#${x.toLowerCase()}`} key={x}>{x}</a>)}</nav>
         <div className="header-actions">
+          <button className="text-button" onClick={() => navigate('/qa-triage')}>🤖 QA AI Triage</button>
           <button className="text-button" onClick={() => navigate('/login')}>MPIN Quick Login</button>
           <button className="primary-button" onClick={() => navigate('/signup')}>Sign Up <Icon name="arrow" size={17} /></button>
         </div>
@@ -201,6 +203,8 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/qa-triage" element={<QaTriageDashboard />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
