@@ -1,0 +1,68 @@
+# ------------------------------------------------------------------------------
+# YourBank Enterprise - GitIgnore Configuration
+# ------------------------------------------------------------------------------
+
+# Operating System & System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Directories
+.idea/
+.vscode/
+*.classpath
+*.project
+*.settings/
+*.iml
+*.iws
+*.ipr
+*.nb-attrs
+
+# Environment & Secret Files (OWASP Security Directive)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Java & Maven Build Outputs (Bank_Service)
+Bank_Service/target/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# Maven Wrapper & Log Files
+Bank_Service/.mvn/timing.properties
+mvnw.cmd
+log/
+*.log
+
+# Node.js & React Frontend Dependencies & Build Outputs (frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# System & Temporary Directories
+tmp/
+temp/
+.cache/
