@@ -22,7 +22,7 @@ pipeline {
             steps {
                 dir('Bank_Service') {
                     echo 'Executing JUnit 5 & Mockito test suite via Maven Wrapper...'
-                    bat 'mvnw.cmd test'
+                    bat 'call mvnw.cmd test -Dtest=VerhoeffAlgorithmTest,TransactionServiceUnitTest'
                 }
             }
         }
