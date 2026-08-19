@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'Java-21'
-        maven 'Maven-3.9'
-    }
-
     triggers {
         // Automatically triggers build when code is pushed to GitHub
         githubPush()
@@ -26,8 +21,8 @@ pipeline {
         stage('Backend Unit & Integration Tests') {
             steps {
                 dir('Bank_Service') {
-                    echo 'Executing JUnit 5 & Mockito test suite...'
-                    bat './mvnw test'
+                    echo 'Executing JUnit 5 & Mockito test suite via Maven Wrapper...'
+                    bat 'mvnw.cmd test'
                 }
             }
         }
