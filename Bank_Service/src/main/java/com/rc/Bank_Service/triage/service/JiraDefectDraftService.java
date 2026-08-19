@@ -21,14 +21,17 @@ public class JiraDefectDraftService {
         this.failureClassificationRepository = failureClassificationRepository;
     }
 
-    public String generateJiraDraftPayload(String testName, String errorMessage, String stackTrace, String reproductionSteps) {
+    public String generateJiraDraftPayload(String testName, String errorMessage, String stackTrace,
+                                          String reproductionSteps, String category, double confidenceScore,
+                                          String writtenReasoning) {
         try {
             Map<String, Object> fields = new HashMap<>();
             fields.put("summary", "[Defect] Automated Test Failed: " + testName);
             fields.put("description", String.format(
-                    "h2. Defect Reproduction Steps\n%s\n\nh2. Error Summary\n%s\n\nh2. Stack Trace\n{code}%s{code}",
+                    "h2. Classification Reasoning\n%s\n\nh2. Defect Reproduction Steps\n%s\n\nh2. Error Summary\n%s\n\nh2. Stack Trace\n{code}%s{code}",
+                    writtenReasoning != null ? writtenReasoning : "High-precision AI analysis performed.",
                     reproductionSteps != null ? reproductionSteps : "1. Run automated test suite\n2. Execute " + testName,
-                    errorMessage,
+                    errorMessage != null ? errorMessage : "No explicit error message provided.",
                     stackTrace != null && stackTrace.length() > 500 ? stackTrace.substring(0, 500) + "..." : stackTrace
             ));
             
@@ -42,6 +45,13 @@ public class JiraDefectDraftService {
 
             Map<String, Object> payload = new HashMap<>();
             payload.put("fields", fields);
+            payload.put("testName", testName);
+            payload.put("category", category);
+            payload.put("confidenceScore", Math.round(confidenceScore * 100));
+            payload.put("writtenReasoning", writtenReasoning);
+            payload.put("reproductionSteps", reproductionSteps);
+            payload.put("errorMessage", errorMessage);
+            payload.put("stackTrace", stackTrace);
             payload.put("status", "DRAFT_PENDING_QA_APPROVAL");
 
             return objectMapper.writeValueAsString(payload);

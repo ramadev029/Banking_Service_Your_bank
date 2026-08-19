@@ -57,11 +57,24 @@ public class TriageController {
         this.flakinessMetricsRepository = flakinessMetricsRepository;
     }
 
+    private String extractStringContent(Object raw) {
+        if (raw == null) return null;
+        if (raw instanceof List<?> list) {
+            StringBuilder sb = new StringBuilder();
+            for (Object item : list) {
+                sb.append(item != null ? item.toString() : "").append("\n");
+            }
+            return sb.toString();
+        }
+        return raw.toString();
+    }
+
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeReport(@RequestBody Map<String, Object> payload) {
-        String xmlContent = payload.get("xmlContent") != null ? payload.get("xmlContent").toString() : null;
-        String jsonContent = payload.get("jsonContent") != null ? payload.get("jsonContent").toString() : null;
-        String suiteName = payload.get("suiteName") != null ? payload.get("suiteName").toString() : "Automated Banking Test Suite";
+        String xmlContent = extractStringContent(payload.get("xmlContent"));
+        String jsonContent = extractStringContent(payload.get("jsonContent"));
+        String suiteName = extractStringContent(payload.get("suiteName"));
+        if (suiteName == null || suiteName.isBlank()) suiteName = "Automated Banking Test Suite";
 
         List<TriageReportParser.ParsedFailureRecord> failures;
         if (xmlContent != null && !xmlContent.isBlank()) {
@@ -72,7 +85,7 @@ public class TriageController {
             failures = List.of();
         }
 
-        TestRun testRun = new TestRun(suiteName, 5, 5 - failures.size(), failures.size(), 4500);
+        TestRun testRun = new TestRun(suiteName, 5, Math.max(0, 5 - failures.size()), failures.size(), 4500);
         testRunRepository.save(testRun);
 
         List<FailureClassification> classifiedResults = failures.stream().map(f -> {

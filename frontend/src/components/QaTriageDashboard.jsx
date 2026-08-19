@@ -88,6 +88,60 @@ export default function QaTriageDashboard() {
   const pendingApprovalDrafts = summary?.pendingApprovalDrafts || []
   const quarantinedTests = summary?.quarantinedTests || []
 
+  const parseJiraPayload = (payloadStr, fallbackTest) => {
+    if (!payloadStr) {
+      return {
+        summary: `[Defect] Automated Test Failed: ${fallbackTest?.testName || 'Unknown Test'}`,
+        category: fallbackTest?.category || 'UNKNOWN',
+        confidenceScore: Math.round((fallbackTest?.confidenceScore || 0.85) * 100),
+        writtenReasoning: fallbackTest?.writtenReasoning || 'AI failure analysis performed.',
+        reproductionSteps: fallbackTest?.reproductionSteps || '1. Run test suite\n2. Inspect stack trace',
+        errorMessage: 'Assertion or Execution Exception',
+        status: 'DRAFT_PENDING_QA_APPROVAL'
+      }
+    }
+    try {
+      const obj = JSON.parse(payloadStr)
+      if (obj.fields) {
+        return {
+          summary: obj.fields.summary || `[Defect] ${fallbackTest?.testName}`,
+          category: obj.category || fallbackTest?.category || 'GENUINE_FUNCTIONAL_DEFECT',
+          confidenceScore: obj.confidenceScore || Math.round((fallbackTest?.confidenceScore || 0.90) * 100),
+          writtenReasoning: obj.writtenReasoning || fallbackTest?.writtenReasoning,
+          reproductionSteps: obj.reproductionSteps || fallbackTest?.reproductionSteps,
+          errorMessage: obj.errorMessage || 'Failure signature detected.',
+          stackTrace: obj.stackTrace || '',
+          status: obj.status || 'DRAFT_PENDING_QA_APPROVAL'
+        }
+      }
+      return obj
+    } catch (e) {
+      return {
+        summary: `[Defect] Automated Test Failed: ${fallbackTest?.testName}`,
+        category: fallbackTest?.category,
+        confidenceScore: Math.round((fallbackTest?.confidenceScore || 0.85) * 100),
+        writtenReasoning: fallbackTest?.writtenReasoning,
+        reproductionSteps: fallbackTest?.reproductionSteps,
+        status: 'DRAFT_PENDING_QA_APPROVAL'
+      }
+    }
+  }
+
+  const getCategoryBadgeStyle = (cat) => {
+    switch (cat) {
+      case 'GENUINE_FUNCTIONAL_DEFECT':
+        return { background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', color: '#fca5a5' }
+      case 'FLAKY_UNSTABLE_TEST':
+        return { background: 'rgba(245, 158, 11, 0.2)', border: '1px solid #f59e0b', color: '#fde68a' }
+      case 'ENVIRONMENT_DATA_ISSUE':
+        return { background: 'rgba(59, 130, 246, 0.2)', border: '1px solid #3b82f6', color: '#93c5fd' }
+      case 'TEST_SCRIPT_ISSUE':
+        return { background: 'rgba(139, 92, 246, 0.2)', border: '1px solid #8b5cf6', color: '#ddd6fe' }
+      default:
+        return { background: 'rgba(148, 163, 184, 0.2)', border: '1px solid #94a3b8', color: '#e2e8f0' }
+    }
+  }
+
   const getAnimatedCardStyle = (id, accentColor) => {
     const isHovered = hoveredCard === id
     return {
@@ -106,6 +160,8 @@ export default function QaTriageDashboard() {
       cursor: 'pointer'
     }
   }
+
+  const parsedModalData = selectedDraft ? parseJiraPayload(selectedDraft.jiraDraftPayload, selectedDraft) : null
 
   return (
     <div style={{ background: '#090d16', color: '#f8fafc', minHeight: '100vh', fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>
@@ -300,6 +356,77 @@ export default function QaTriageDashboard() {
           </div>
         </div>
 
+        {/* Detailed Failure Analysis & Reasoning Grid */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.6)',
+          backdropFilter: 'blur(16px)',
+          padding: '30px',
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          marginBottom: '40px'
+        }}>
+          <h3 style={{ margin: '0 0 20px 0', color: '#38bdf8', fontSize: '20px', fontWeight: 700 }}>AI Classification Analysis & Deep Reasoning</h3>
+          {recentClassifications.length === 0 ? (
+            <p style={{ color: '#94a3b8', fontSize: '15px' }}>No failure reports analyzed yet. Trigger a build failure to populate analysis.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              {recentClassifications.map(item => {
+                const badgeStyle = getCategoryBadgeStyle(item.category)
+                return (
+                  <div key={item.id} style={{
+                    background: 'rgba(30, 41, 59, 0.7)',
+                    padding: '22px',
+                    borderRadius: '14px',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ margin: 0, fontSize: '18px', color: '#f8fafc', fontWeight: 700 }}>{item.testName}</h4>
+                      <span style={{
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        letterSpacing: '0.5px',
+                        ...badgeStyle
+                      }}>
+                        {item.category} ({Math.round(item.confidenceScore * 100)}% Confidence)
+                      </span>
+                    </div>
+
+                    <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '14px', borderRadius: '10px', borderLeft: '4px solid #0284c7' }}>
+                      <strong style={{ color: '#38bdf8', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>💡 AI Reasoning & Failure Cause:</strong>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#e2e8f0', lineHeight: 1.5 }}>{item.writtenReasoning}</p>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+                      <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+                        <strong>Action Plan:</strong> {item.reproductionSteps?.split('\n')[0] || 'Inspect stack trace and verify assertions.'}
+                      </div>
+                      <button 
+                        onClick={() => setSelectedDraft(item)} 
+                        style={{
+                          background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                          border: 'none',
+                          color: '#fff',
+                          padding: '8px 16px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '13px'
+                        }}>
+                        Preview Jira Draft
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Human-in-the-Loop Jira Defect Approval Queue */}
         <div style={{
           background: 'rgba(15, 23, 42, 0.6)',
@@ -375,19 +502,55 @@ export default function QaTriageDashboard() {
 
       </div>
 
-      {/* Preview Modal */}
-      {selectedDraft && (
+      {/* Structured Document Preview Modal (Fixes Empty Box Bug) */}
+      {selectedDraft && parsedModalData && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#1e293b', width: '640px', padding: '28px', borderRadius: '16px', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-            <h3 style={{ margin: 0, color: '#f43f5e', fontSize: '20px', fontWeight: 700 }}>Preview Jira Defect Draft</h3>
-            <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '6px' }}>Test: {selectedDraft.testName}</p>
-            <div style={{ background: '#0f172a', padding: '16px', borderRadius: '10px', margin: '18px 0', fontSize: '13px', maxHeight: '240px', overflowY: 'auto', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-              <pre style={{ margin: 0, whiteSpace: 'pre-wrap', color: '#e2e8f0' }}>{selectedDraft.jiraDraftPayload}</pre>
+          <div style={{ background: '#1e293b', width: '720px', maxHeight: '85vh', overflowY: 'auto', padding: '32px', borderRadius: '18px', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.15)', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)' }}>
+            
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '20px' }}>
+              <div>
+                <span style={{ background: '#f43f5e', color: '#fff', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Jira Bug Ticket Draft</span>
+                <h3 style={{ margin: '8px 0 0 0', color: '#fca5a5', fontSize: '20px', fontWeight: 700 }}>{parsedModalData.summary}</h3>
+              </div>
+              <button onClick={() => setSelectedDraft(null)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '22px', cursor: 'pointer' }}>✕</button>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => setSelectedDraft(null)} style={{ background: '#334155', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Close</button>
-              <button onClick={() => handleApproveJiraDraft(selectedDraft.id)} style={{ background: '#10b981', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Approve & Send</button>
+
+            {/* Category & Confidence Badge */}
+            <div style={{ display: 'flex', gap: '14px', marginBottom: '20px' }}>
+              <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '10px 16px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.08)', flex: 1 }}>
+                <span style={{ fontSize: '12px', color: '#94a3b8', display: 'block', fontWeight: 600 }}>CLASSIFICATION</span>
+                <strong style={{ color: '#38bdf8', fontSize: '15px' }}>{parsedModalData.category}</strong>
+              </div>
+              <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '10px 16px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.08)', flex: 1 }}>
+                <span style={{ fontSize: '12px', color: '#94a3b8', display: 'block', fontWeight: 600 }}>CONFIDENCE SCORE</span>
+                <strong style={{ color: '#10b981', fontSize: '15px' }}>{parsedModalData.confidenceScore}%</strong>
+              </div>
             </div>
+
+            {/* AI Reasoning Section */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.9)', padding: '18px', borderRadius: '12px', marginBottom: '18px', borderLeft: '4px solid #38bdf8' }}>
+              <h4 style={{ margin: '0 0 8px 0', color: '#38bdf8', fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>💡 AI Diagnostic Reasoning</h4>
+              <p style={{ margin: 0, fontSize: '14px', color: '#e2e8f0', lineHeight: 1.5 }}>{parsedModalData.writtenReasoning}</p>
+            </div>
+
+            {/* Reproduction Steps Section */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.9)', padding: '18px', borderRadius: '12px', marginBottom: '18px', borderLeft: '4px solid #10b981' }}>
+              <h4 style={{ margin: '0 0 8px 0', color: '#10b981', fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>📋 Defect Reproduction Steps</h4>
+              <pre style={{ margin: 0, fontSize: '13px', color: '#e2e8f0', fontFamily: 'inherit', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{parsedModalData.reproductionSteps}</pre>
+            </div>
+
+            {/* Governance Status */}
+            <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid #f43f5e', padding: '14px', borderRadius: '10px', marginBottom: '24px', fontSize: '13px', color: '#fca5a5' }}>
+              🛡️ <strong>Human-in-the-Loop Governance:</strong> {parsedModalData.status || 'DRAFT_PENDING_QA_APPROVAL'} (Requires explicit QA Lead sign-off before dispatching to Jira REST API).
+            </div>
+
+            {/* Footer Buttons */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '18px' }}>
+              <button onClick={() => setSelectedDraft(null)} style={{ background: '#334155', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Close Preview</button>
+              <button onClick={() => handleApproveJiraDraft(selectedDraft.id)} style={{ background: '#10b981', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Approve & Submit to Jira</button>
+            </div>
+
           </div>
         </div>
       )}

@@ -65,10 +65,10 @@ public class TriageClassifierService {
     public FailureClassification classifyAndSave(String testName, String errorMessage, String stackTrace) {
         ClassificationResult result = classifyFailure(testName, errorMessage, stackTrace);
         
-        String jiraPayload = null;
-        if ("GENUINE_FUNCTIONAL_DEFECT".equalsIgnoreCase(result.getCategory())) {
-            jiraPayload = jiraDefectDraftService.generateJiraDraftPayload(testName, errorMessage, stackTrace, result.getReproductionSteps());
-        }
+        String jiraPayload = jiraDefectDraftService.generateJiraDraftPayload(
+                testName, errorMessage, stackTrace, result.getReproductionSteps(),
+                result.getCategory(), result.getConfidenceScore(), result.getWrittenReasoning()
+        );
 
         FailureClassification classification = new FailureClassification(
                 testName,
@@ -139,7 +139,7 @@ public class TriageClassifierService {
                 0.80,
                 "Unhandled functional error detected during test execution requiring developer review.",
                 "1. Trigger test suite\n2. Inspect stack trace\n3. Verify endpoint logic"
-        );
+            );
     }
 
     private ClassificationResult callGeminiClassifier(String testName, String errorMessage, String stackTrace) {

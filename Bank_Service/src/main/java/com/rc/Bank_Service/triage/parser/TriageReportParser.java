@@ -49,17 +49,40 @@ public class TriageReportParser {
         if (xmlContent == null || xmlContent.isBlank()) return failures;
 
         try {
+            String cleanXml = xmlContent.trim();
+            // Strip UTF-8 Byte Order Mark (BOM) \uFEFF if present from PowerShell
+            if (cleanXml.startsWith("\uFEFF")) {
+                cleanXml = cleanXml.substring(1).trim();
+            }
+            // Strip outer JSON array brackets if present
+            if (cleanXml.startsWith("[") && cleanXml.endsWith("]")) {
+                cleanXml = cleanXml.substring(1, cleanXml.length() - 1).trim();
+            }
+            // Ensure XML starts at first '<'
+            int xmlStart = cleanXml.indexOf("<");
+            if (xmlStart > 0) {
+                cleanXml = cleanXml.substring(xmlStart);
+            }
+
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            factory.setNamespaceAware(false);
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8)));
+            Document doc = builder.parse(new ByteArrayInputStream(cleanXml.getBytes(StandardCharsets.UTF_8)));
 
             NodeList testcases = doc.getElementsByTagName("testcase");
             for (int i = 0; i < testcases.getLength(); i++) {
                 Element tc = (Element) testcases.item(i);
                 String name = tc.getAttribute("name");
                 String classname = tc.getAttribute("classname");
-                long timeMs = (long) (Double.parseDouble(tc.getAttribute("time").isBlank() ? "0" : tc.getAttribute("time")) * 1000);
+                String timeAttr = tc.getAttribute("time");
+                long timeMs = 0;
+                try {
+                    if (timeAttr != null && !timeAttr.isBlank()) {
+                        timeMs = (long) (Double.parseDouble(timeAttr) * 1000);
+                    }
+                } catch (Exception ignored) {}
 
                 NodeList failureNodes = tc.getElementsByTagName("failure");
                 if (failureNodes.getLength() == 0) {
@@ -69,6 +92,12 @@ public class TriageReportParser {
                 if (failureNodes.getLength() > 0) {
                     Element failureEl = (Element) failureNodes.item(0);
                     String message = failureEl.getAttribute("message");
+                    if (message == null || message.isBlank()) {
+                        message = failureEl.getAttribute("type");
+                    }
+                    if (message == null || message.isBlank()) {
+                        message = "Assertion or Test Execution Failure";
+                    }
                     String stackTrace = failureEl.getTextContent();
                     failures.add(new ParsedFailureRecord(name, classname, message, stackTrace, timeMs));
                 }
