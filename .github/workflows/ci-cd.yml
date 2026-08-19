@@ -22,11 +22,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run Maven Tests & Build
+      - name: Run Maven Unit Tests & Build
         run: |
           cd Bank_Service
           chmod +x mvnw
-          ./mvnw test -Dtest=EnterpriseSignUpIntegrationTest,TransactionServiceIntegrationTest
+          ./mvnw test -Dtest=VerhoeffAlgorithmTest,TransactionServiceUnitTest
 
       - name: Publish Test Report
         if: always()
