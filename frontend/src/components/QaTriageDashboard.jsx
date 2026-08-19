@@ -12,7 +12,7 @@ export default function QaTriageDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:8080/api/v1/triage/dashboard-summary')
+      const res = await fetch('http://localhost:8085/api/v1/triage/dashboard-summary')
       if (res.ok) {
         const data = await res.json()
         setSummary(data)
@@ -26,7 +26,7 @@ export default function QaTriageDashboard() {
 
   const runEvaluationHarness = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/v1/triage/evaluation-matrix')
+      const res = await fetch('http://localhost:8085/api/v1/triage/evaluation-matrix')
       if (res.ok) {
         const data = await res.json()
         setEvalResult(data)
@@ -38,11 +38,11 @@ export default function QaTriageDashboard() {
 
   const handleApproveJiraDraft = async (draftId) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/v1/triage/approve-jira/${draftId}`, {
+      const res = await fetch(`http://localhost:8085/api/v1/triage/approve-jira/${draftId}`, {
         method: 'POST'
       })
       if (res.ok) {
-        setApprovalMessage('✅ Defect Draft approved by QA Lead & submitted to Jira successfully!')
+        setApprovalMessage('Defect draft approved by QA lead and submitted to Jira successfully.')
         setSelectedDraft(null)
         fetchDashboardData()
       }
@@ -58,7 +58,7 @@ export default function QaTriageDashboard() {
   if (loading) {
     return (
       <div style={{ padding: '60px', textAlign: 'center', fontFamily: 'sans-serif' }}>
-        <h2>🤖 Loading AI Triage Assistant Metrics...</h2>
+        <h2>Loading AI Triage Assistant Metrics...</h2>
       </div>
     )
   }
@@ -72,15 +72,15 @@ export default function QaTriageDashboard() {
     <div style={{ background: '#0f172a', color: '#f8fafc', minHeight: '100vh', padding: '30px', fontFamily: 'Segoe UI, Tahoma, sans-serif' }}>
       
       {/* Top Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '1px solid #334155', pb: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '1px solid #334155', paddingBottom: '20px' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: '28px', color: '#38bdf8' }}>🤖 AI-Powered Test Execution Failure Triage Assistant</h1>
+          <h1 style={{ margin: 0, fontSize: '28px', color: '#38bdf8', fontWeight: 700 }}>AI Test Execution Failure Triage Assistant</h1>
           <p style={{ margin: '5px 0 0 0', color: '#94a3b8' }}>Human-in-the-Loop QA Automation Tooling | 4-Way Classifier & Flakiness Tracker</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={fetchDashboardData} style={{ background: '#1e293b', border: '1px solid #475569', color: '#e2e8f0', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>🔄 Refresh</button>
-          <button onClick={runEvaluationHarness} style={{ background: '#0284c7', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>📊 Run Module 7 Evaluation Matrix</button>
-          <button onClick={() => navigate('/')} style={{ background: '#334155', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>🏦 Exit to Banking App</button>
+          <button onClick={fetchDashboardData} style={{ background: '#1e293b', border: '1px solid #475569', color: '#e2e8f0', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Refresh Metrics</button>
+          <button onClick={runEvaluationHarness} style={{ background: '#0284c7', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Run Classification Evaluation Matrix</button>
+          <button onClick={() => navigate('/')} style={{ background: '#334155', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Return to Banking Application</button>
         </div>
       </div>
 
@@ -93,49 +93,49 @@ export default function QaTriageDashboard() {
       {/* Top Metrics Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '30px' }}>
         <div style={{ background: '#1e293b', padding: '20px', borderRadius: '12px', borderLeft: '5px solid #38bdf8' }}>
-          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase' }}>Suite Health Index</span>
+          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Suite Health Index</span>
           <h2 style={{ fontSize: '32px', margin: '10px 0 0 0', color: '#38bdf8' }}>{summary?.suiteHealthScore?.toFixed(1)}%</h2>
         </div>
         <div style={{ background: '#1e293b', padding: '20px', borderRadius: '12px', borderLeft: '5px solid #f43f5e' }}>
-          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase' }}>Defects Awaiting QA Approval</span>
+          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Defects Awaiting QA Approval</span>
           <h2 style={{ fontSize: '32px', margin: '10px 0 0 0', color: '#f43f5e' }}>{pendingApprovalDrafts.length}</h2>
         </div>
         <div style={{ background: '#1e293b', padding: '20px', borderRadius: '12px', borderLeft: '5px solid #f59e0b' }}>
-          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase' }}>Quarantined Flaky Tests (≥25%)</span>
+          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Quarantined Flaky Tests (≥25%)</span>
           <h2 style={{ fontSize: '32px', margin: '10px 0 0 0', color: '#f59e0b' }}>{quarantinedTests.length}</h2>
         </div>
         <div style={{ background: '#1e293b', padding: '20px', borderRadius: '12px', borderLeft: '5px solid #10b981' }}>
-          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase' }}>Total Failures Analyzed</span>
+          <span style={{ fontSize: '13px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600 }}>Total Failures Analyzed</span>
           <h2 style={{ fontSize: '32px', margin: '10px 0 0 0', color: '#10b981' }}>{recentClassifications.length}</h2>
         </div>
       </div>
 
-      {/* 4-Way Failure Category Breakdown */}
+      {/* 4-Way Failure Category Distribution */}
       <div style={{ background: '#1e293b', padding: '24px', borderRadius: '12px', marginBottom: '30px' }}>
-        <h3 style={{ margin: '0 0 16px 0', color: '#e2e8f0' }}>📌 Module 3: 4-Way Failure Category Breakdown</h3>
+        <h3 style={{ margin: '0 0 16px 0', color: '#e2e8f0', fontSize: '18px', fontWeight: 600 }}>Failure Category Distribution</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
           <div style={{ background: '#0f172a', padding: '16px', borderRadius: '8px', border: '1px solid #ef4444' }}>
-            <span style={{ color: '#fca5a5', fontWeight: 600 }}>🔴 Genuine Functional Defect</span>
+            <span style={{ color: '#fca5a5', fontWeight: 600 }}>Genuine Functional Defect</span>
             <h3 style={{ margin: '8px 0 0 0', fontSize: '24px', color: '#fff' }}>{categoryCounts.GENUINE_FUNCTIONAL_DEFECT || 0}</h3>
           </div>
           <div style={{ background: '#0f172a', padding: '16px', borderRadius: '8px', border: '1px solid #f59e0b' }}>
-            <span style={{ color: '#fde68a', fontWeight: 600 }}>⚠️ Flaky / Unstable Test</span>
+            <span style={{ color: '#fde68a', fontWeight: 600 }}>Flaky / Unstable Test</span>
             <h3 style={{ margin: '8px 0 0 0', fontSize: '24px', color: '#fff' }}>{categoryCounts.FLAKY_UNSTABLE_TEST || 0}</h3>
           </div>
           <div style={{ background: '#0f172a', padding: '16px', borderRadius: '8px', border: '1px solid #3b82f6' }}>
-            <span style={{ color: '#93c5fd', fontWeight: 600 }}>🌐 Environment / Data Issue</span>
+            <span style={{ color: '#93c5fd', fontWeight: 600 }}>Environment / Data Issue</span>
             <h3 style={{ margin: '8px 0 0 0', fontSize: '24px', color: '#fff' }}>{categoryCounts.ENVIRONMENT_DATA_ISSUE || 0}</h3>
           </div>
           <div style={{ background: '#0f172a', padding: '16px', borderRadius: '8px', border: '1px solid #8b5cf6' }}>
-            <span style={{ color: '#ddd6fe', fontWeight: 600 }}>🛠️ Test Script Issue</span>
+            <span style={{ color: '#ddd6fe', fontWeight: 600 }}>Test Script Issue</span>
             <h3 style={{ margin: '8px 0 0 0', fontSize: '24px', color: '#fff' }}>{categoryCounts.TEST_SCRIPT_ISSUE || 0}</h3>
           </div>
         </div>
       </div>
 
-      {/* Jira Draft Approval Panel (Human-in-the-Loop) */}
+      {/* Human-in-the-Loop Jira Approval Queue */}
       <div style={{ background: '#1e293b', padding: '24px', borderRadius: '12px', marginBottom: '30px' }}>
-        <h3 style={{ margin: '0 0 16px 0', color: '#f43f5e' }}>🛡️ Module 5: Human-in-the-Loop Jira Defect Approval Queue</h3>
+        <h3 style={{ margin: '0 0 16px 0', color: '#f43f5e', fontSize: '18px', fontWeight: 600 }}>Human-in-the-Loop Jira Defect Approval Queue</h3>
         {pendingApprovalDrafts.length === 0 ? (
           <p style={{ color: '#94a3b8' }}>No pending defect drafts. All genuine defects have been reviewed by QA.</p>
         ) : (
@@ -156,10 +156,10 @@ export default function QaTriageDashboard() {
         )}
       </div>
 
-      {/* Module 7 Evaluation Matrix (If Executed) */}
+      {/* Classification Evaluation Matrix & Accuracy Metrics */}
       {evalResult && (
         <div style={{ background: '#1e293b', padding: '24px', borderRadius: '12px', marginBottom: '30px', border: '1px solid #0284c7' }}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#38bdf8' }}>📊 Module 7 Evaluation Harness Matrix & Accuracy Metrics</h3>
+          <h3 style={{ margin: '0 0 16px 0', color: '#38bdf8', fontSize: '18px', fontWeight: 600 }}>Classification Evaluation Matrix & Accuracy Metrics</h3>
           <p style={{ color: '#94a3b8' }}>Total Hand-Labeled Benchmark Cases: <strong>{evalResult.totalCases}</strong> | Correct Predictions: <strong>{evalResult.correctPredictions}</strong> | Overall Accuracy: <strong>{evalResult.accuracyPercentage.toFixed(1)}%</strong></p>
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
             <thead>
