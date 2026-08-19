@@ -22,7 +22,7 @@ pipeline {
             steps {
                 dir('Bank_Service') {
                     echo 'Executing automated test suite via Maven Wrapper...'
-                    bat 'call mvnw.cmd test -Dtest=VerhoeffAlgorithmTest,TransactionServiceUnitTest,TriageClassifierUnitTest -Dmaven.test.failure.ignore=true'
+                    bat 'call mvnw.cmd test -Dtest=*Test -Dmaven.test.failure.ignore=true'
                 }
             }
         }
