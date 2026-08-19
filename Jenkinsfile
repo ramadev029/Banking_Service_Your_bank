@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     triggers {
-        // Automatically triggers build when code is pushed to GitHub
+        // Automatically triggers build when code is pushed to GitHub or via automated SCM polling every 2 minutes
         githubPush()
+        pollSCM('H/2 * * * *')
     }
 
     environment {
