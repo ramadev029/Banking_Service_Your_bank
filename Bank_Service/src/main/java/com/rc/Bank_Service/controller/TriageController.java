@@ -118,7 +118,7 @@ public class TriageController {
             categoryCounts.put(cat, categoryCounts.getOrDefault(cat, 0) + 1);
         }
 
-        double suiteHealthScore = 100.0 - (quarantinedTests.size() * 5.0);
+        double suiteHealthScore = 100.0 - (quarantinedTests.size() * 5.0) - (pendingApprovalDrafts.size() * 10.0);
         if (suiteHealthScore < 0) suiteHealthScore = 0.0;
 
         Map<String, Object> summary = new HashMap<>();

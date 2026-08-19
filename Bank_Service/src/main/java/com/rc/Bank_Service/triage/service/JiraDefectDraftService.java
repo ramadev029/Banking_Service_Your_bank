@@ -66,6 +66,10 @@ public class JiraDefectDraftService {
                 .orElseThrow(() -> new IllegalArgumentException("Classification ID not found: " + classificationId));
 
         classification.setHumanApproved(true);
+        if (classification.getJiraDraftPayload() != null) {
+            String updatedPayload = classification.getJiraDraftPayload().replace("DRAFT_PENDING_QA_APPROVAL", "SUBMITTED_TO_JIRA");
+            classification.setJiraDraftPayload(updatedPayload);
+        }
         System.out.println("[JiraDefectDraftService] QA Lead approved Jira Defect for test: " + classification.getTestName());
         
         return failureClassificationRepository.save(classification);
