@@ -47,7 +47,8 @@ hs_err_pid*
 
 # Maven Wrapper & Log Files
 Bank_Service/.mvn/timing.properties
-mvnw.cmd
+!Bank_Service/mvnw.cmd
+!mvnw.cmd
 log/
 *.log
 
