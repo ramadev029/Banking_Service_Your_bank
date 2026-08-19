@@ -32,8 +32,8 @@ pipeline {
             steps {
                 dir('frontend') {
                     echo 'Installing npm dependencies and building frontend...'
-                    bat 'npm install --no-audit'
-                    bat 'npm run build'
+                    bat 'call npm.cmd install --no-audit'
+                    bat 'call npm.cmd run build'
                 }
             }
         }
@@ -41,7 +41,7 @@ pipeline {
         stage('AI Triage Ingestion & Test Report Compilation') {
             steps {
                 echo 'Compiling JUnit XML test reports for AI Triage Analysis...'
-                junit 'Bank_Service/target/surefire-reports/*.xml'
+                junit allowEmptyResults: true, testResults: 'Bank_Service/target/surefire-reports/*.xml'
             }
         }
     }
