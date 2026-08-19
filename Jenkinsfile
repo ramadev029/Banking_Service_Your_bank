@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         APP_NAME = 'yourbank-banking-service'
-        TRIAGE_API_URL = 'http://localhost:8080/api/v1/triage/analyze'
+        TRIAGE_API_URL = 'http://localhost:8085/api/v1/triage/analyze'
     }
 
     stages {
@@ -23,7 +23,7 @@ pipeline {
             steps {
                 dir('Bank_Service') {
                     echo 'Executing JUnit 5 & Mockito test suite via Maven Wrapper...'
-                    bat 'call mvnw.cmd test -Dtest=VerhoeffAlgorithmTest,TransactionServiceUnitTest'
+                    bat 'call mvnw.cmd test -Dtest=VerhoeffAlgorithmTest,TransactionServiceUnitTest,TriageClassifierUnitTest'
                 }
             }
         }
@@ -49,13 +49,14 @@ pipeline {
     post {
         always {
             echo 'Sending test run metrics & logs to AI Triage Assistant Backend...'
+            bat 'powershell -Command "$files = Get-ChildItem -Path Bank_Service/target/surefire-reports/*.xml; foreach($f in $files){ $xml = Get-Content $f.FullName -Raw; $json = @{suiteName=\'Jenkins CI/CD Build\'; xmlContent=$xml} | ConvertTo-Json; Invoke-RestMethod -Uri \'%TRIAGE_API_URL%\' -Method Post -ContentType \'application/json\' -Body $json }"'
             cleanWs()
         }
         success {
             echo '✅ CI/CD Pipeline Execution PASSED successfully!'
         }
         failure {
-            echo '🚨 CI/CD Build Failure Detected! Dispatching failure logs to AI Triage Classifier for 4-Way Failure Analysis & Jira Defect Drafting...'
+            echo '🚨 CI/CD Build Failure Detected! Dispatched failure logs to AI Triage Classifier for 4-Way Failure Analysis & Jira Defect Drafting.'
         }
     }
 }
