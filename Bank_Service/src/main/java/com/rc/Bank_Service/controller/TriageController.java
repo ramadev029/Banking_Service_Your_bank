@@ -58,10 +58,10 @@ public class TriageController {
     }
 
     @PostMapping("/analyze")
-    public ResponseEntity<Map<String, Object>> analyzeReport(@RequestBody Map<String, String> payload) {
-        String xmlContent = payload.get("xmlContent");
-        String jsonContent = payload.get("jsonContent");
-        String suiteName = payload.getOrDefault("suiteName", "Automated Banking Test Suite");
+    public ResponseEntity<Map<String, Object>> analyzeReport(@RequestBody Map<String, Object> payload) {
+        String xmlContent = payload.get("xmlContent") != null ? payload.get("xmlContent").toString() : null;
+        String jsonContent = payload.get("jsonContent") != null ? payload.get("jsonContent").toString() : null;
+        String suiteName = payload.get("suiteName") != null ? payload.get("suiteName").toString() : "Automated Banking Test Suite";
 
         List<TriageReportParser.ParsedFailureRecord> failures;
         if (xmlContent != null && !xmlContent.isBlank()) {
