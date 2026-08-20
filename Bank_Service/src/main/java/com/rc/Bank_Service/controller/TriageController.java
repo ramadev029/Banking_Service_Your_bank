@@ -3,6 +3,7 @@ package com.rc.Bank_Service.controller;
 import com.rc.Bank_Service.triage.eval.TriageEvaluationHarness;
 import com.rc.Bank_Service.triage.model.FailureClassification;
 import com.rc.Bank_Service.triage.model.FlakinessMetrics;
+import com.rc.Bank_Service.triage.model.TestExecutionHistory;
 import com.rc.Bank_Service.triage.model.TestRun;
 import com.rc.Bank_Service.triage.parser.TriageReportParser;
 import com.rc.Bank_Service.triage.repository.FailureClassificationRepository;
@@ -85,11 +86,29 @@ public class TriageController {
             failures = List.of();
         }
 
-        TestRun testRun = new TestRun(suiteName, 5, Math.max(0, 5 - failures.size()), failures.size(), 4500);
+        int totalTests = Math.max(failures.size(), 5);
+        int failedCount = failures.size();
+        int passedCount = totalTests - failedCount;
+
+        TestRun testRun = new TestRun(suiteName, totalTests, passedCount, failedCount, 4500);
         testRunRepository.save(testRun);
 
         List<FailureClassification> classifiedResults = failures.stream().map(f -> {
+            // Save execution history record for database Module 2
+            TestExecutionHistory history = new TestExecutionHistory(
+                f.getTestName(),
+                f.getClassName(),
+                false,
+                f.getErrorMessage(),
+                f.getStackTrace(),
+                f.getDurationMs()
+            );
+            testExecutionHistoryRepository.save(history);
+
+            // Update flakiness metrics
             flakinessTrackerService.updateFlakinessScore(f.getTestName());
+
+            // Run AI Classification & save
             return classifierService.classifyAndSave(f.getTestName(), f.getErrorMessage(), f.getStackTrace());
         }).toList();
 
