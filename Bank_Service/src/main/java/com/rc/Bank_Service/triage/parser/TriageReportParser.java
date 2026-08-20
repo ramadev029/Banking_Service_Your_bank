@@ -54,14 +54,12 @@ public class TriageReportParser {
             if (cleanXml.startsWith("\uFEFF")) {
                 cleanXml = cleanXml.substring(1).trim();
             }
-            // Strip outer JSON array brackets if present
-            if (cleanXml.startsWith("[") && cleanXml.endsWith("]")) {
-                cleanXml = cleanXml.substring(1, cleanXml.length() - 1).trim();
-            }
-            // Ensure XML starts at first '<'
+
+            // Slice precisely from first '<' to last '>' to remove any trailing JSON quotes or formatting
             int xmlStart = cleanXml.indexOf("<");
-            if (xmlStart > 0) {
-                cleanXml = cleanXml.substring(xmlStart);
+            int xmlEnd = cleanXml.lastIndexOf(">");
+            if (xmlStart >= 0 && xmlEnd > xmlStart) {
+                cleanXml = cleanXml.substring(xmlStart, xmlEnd + 1);
             }
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -71,9 +69,9 @@ public class TriageReportParser {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new ByteArrayInputStream(cleanXml.getBytes(StandardCharsets.UTF_8)));
 
-            NodeList testcases = doc.getElementsByTagName("testcase");
-            for (int i = 0; i < testcases.getLength(); i++) {
-                Element tc = (Element) testcases.item(i);
+            NodeList testcaseList = doc.getElementsByTagName("testcase");
+            for (int i = 0; i < testcaseList.getLength(); i++) {
+                Element tc = (Element) testcaseList.item(i);
                 String name = tc.getAttribute("name");
                 String classname = tc.getAttribute("classname");
                 String timeAttr = tc.getAttribute("time");
@@ -96,6 +94,9 @@ public class TriageReportParser {
                         message = failureEl.getAttribute("type");
                     }
                     if (message == null || message.isBlank()) {
+                        message = failureEl.getTextContent();
+                    }
+                    if (message == null || message.isBlank()) {
                         message = "Assertion or Test Execution Failure";
                     }
                     String stackTrace = failureEl.getTextContent();
@@ -104,6 +105,7 @@ public class TriageReportParser {
             }
         } catch (Exception e) {
             System.err.println("[TriageReportParser] Error parsing JUnit XML: " + e.getMessage());
+            e.printStackTrace();
         }
         return failures;
     }

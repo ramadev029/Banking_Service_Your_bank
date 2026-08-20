@@ -98,7 +98,7 @@ public class TriageController {
             TestExecutionHistory history = new TestExecutionHistory(
                 f.getTestName(),
                 f.getClassName(),
-                false,
+                "FAIL",
                 f.getErrorMessage(),
                 f.getStackTrace(),
                 f.getDurationMs()
