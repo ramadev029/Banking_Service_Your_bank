@@ -85,7 +85,7 @@ export default function SignUpPage({ onBackToHome }) {
     setError(null)
 
     try {
-      const res = await fetch('http://localhost:8080/api/v1/auth/kyc/send-aadhaar-otp', {
+      const res = await fetch('http://localhost:8085/api/v1/auth/kyc/send-aadhaar-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ aadhaarNumber: formData.aadhaarNumber })
@@ -113,7 +113,7 @@ export default function SignUpPage({ onBackToHome }) {
     setError(null)
 
     try {
-      const res = await fetch('http://localhost:8080/api/v1/auth/kyc/verify-aadhaar-otp', {
+      const res = await fetch('http://localhost:8085/api/v1/auth/kyc/verify-aadhaar-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ txnId: otpTxnId, otp: otpValue })
@@ -166,7 +166,7 @@ export default function SignUpPage({ onBackToHome }) {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/signup', {
+      const response = await fetch('http://localhost:8085/api/v1/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

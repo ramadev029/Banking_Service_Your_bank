@@ -36,7 +36,7 @@ export default function RazorpayModal({ isOpen, onClose, amount, accountNumber, 
         remarkDetails = `Deposit of ₹${amount} via Razorpay NetBanking (${selectedBank})`
       }
 
-      const verifyRes = await fetch(`http://localhost:8080/api/v1/payments/razorpay/verify?amount=${amount}&category=${categoryTag}&remarks=${encodeURIComponent(remarkDetails)}`, {
+      const verifyRes = await fetch(`http://localhost:8085/api/v1/payments/razorpay/verify?amount=${amount}&category=${categoryTag}&remarks=${encodeURIComponent(remarkDetails)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

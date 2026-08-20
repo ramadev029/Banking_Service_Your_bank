@@ -162,4 +162,15 @@ public class TriageController {
         TriageEvaluationHarness.EvaluationResult result = evaluationHarness.runEvaluation();
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/clear-test-data")
+    public ResponseEntity<Map<String, String>> clearTestData() {
+        failureClassificationRepository.deleteAll();
+        flakinessMetricsRepository.deleteAll();
+        testExecutionHistoryRepository.deleteAll();
+        testRunRepository.deleteAll();
+        Map<String, String> res = new HashMap<>();
+        res.put("message", "All test run history and classifications cleared successfully for fresh testing.");
+        return ResponseEntity.ok(res);
+    }
 }

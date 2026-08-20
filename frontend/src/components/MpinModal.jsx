@@ -49,7 +49,7 @@ export default function MpinModal({ isOpen, onClose, onSuccessLogin }) {
     const fullMpin = mpinDigits.join('')
 
     if (!identifier || !identifier.trim()) {
-      setError('Please enter your Customer CIF ID, Account Number, or Email.')
+      setError('Please enter your Phone Number, Email, Customer CIF ID, or Account Number.')
       return
     }
     if (fullMpin.length !== 6) {
@@ -61,7 +61,7 @@ export default function MpinModal({ isOpen, onClose, onSuccessLogin }) {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/mpin/login', {
+      const response = await fetch('http://localhost:8085/api/v1/auth/mpin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: identifier.trim(), mpin: fullMpin })

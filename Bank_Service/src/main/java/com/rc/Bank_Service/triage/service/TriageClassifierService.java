@@ -118,7 +118,8 @@ public class TriageClassifierService {
         // 2. High-Precision LLM Classifier Engine (Gemini API via Java 21 HttpClient)
         if (geminiApiKey != null && !geminiApiKey.isBlank() && !geminiApiKey.contains("AQ.Ab8RN6JbpleCakWAd3YXWOctK94rNVcp1bfy0XR")) {
             try {
-                return callGeminiClassifier(testName, errorMessage, stackTrace);
+                String histContext = metrics.isPresent() ? "Historical Flakiness Score: " + String.format("%.1f", metrics.get().getFlakinessScore()) + "% (" + metrics.get().getFlipCount() + " flips in " + metrics.get().getTotalRuns() + " runs)" : "First run failure";
+                return callGeminiClassifier(testName, errorMessage, stackTrace, histContext);
             } catch (Exception e) {
                 System.err.println("[TriageClassifierService] LLM API Call Fallback: " + e.getMessage());
             }
@@ -142,15 +143,25 @@ public class TriageClassifierService {
             );
     }
 
-    private ClassificationResult callGeminiClassifier(String testName, String errorMessage, String stackTrace) {
+    private ClassificationResult callGeminiClassifier(String testName, String errorMessage, String stackTrace, String historicalContext) {
         String prompt = String.format(
-                "You are an expert QA AI Triage Engine. Analyze this test failure:\n" +
-                "Test: %s\nError: %s\nStack: %s\n\n" +
-                "Classify into EXACTLY ONE category:\n" +
-                "1. GENUINE_FUNCTIONAL_DEFECT\n2. FLAKY_UNSTABLE_TEST\n3. ENVIRONMENT_DATA_ISSUE\n4. TEST_SCRIPT_ISSUE\n\n" +
+                "You are an expert QA AI Triage Engine for TrustBank Mobile Banking App.\n" +
+                "Analyze this test failure:\n" +
+                "Test: %s\n" +
+                "Error Message: %s\n" +
+                "Stack Trace: %s\n" +
+                "Historical Run Context: %s\n\n" +
+                "Decision Guidelines based on TrustBank QA Rules:\n" +
+                "1. GENUINE_FUNCTIONAL_DEFECT: Test fails consistently with a specific wrong business result (e.g. transfer of $500 allowed on $200 balance resulting in -$300 balance).\n" +
+                "2. FLAKY_UNSTABLE_TEST: Test passed 9 of last 10 times but failed timing/screen refresh wait condition this one time.\n" +
+                "3. ENVIRONMENT_DATA_ISSUE: Multiple unrelated tests fail together with connection refused, database timeout, or core banking system unreachable.\n" +
+                "4. TEST_SCRIPT_ISSUE: Element locator mismatch after normal UI redesign (e.g. looking for 'transfer-btn' when renamed to 'send-money-btn', NoSuchElementException).\n\n" +
+                "Classify into EXACTLY ONE of the 4 categories above.\n" +
                 "Respond ONLY in valid JSON:\n" +
-                "{\"category\":\"...\", \"confidence\": 0.95, \"reasoning\":\"...\", \"reproductionSteps\":\"...\"}",
-                testName, errorMessage, stackTrace != null && stackTrace.length() > 300 ? stackTrace.substring(0, 300) : stackTrace
+                "{\"category\":\"GENUINE_FUNCTIONAL_DEFECT\", \"confidence\": 0.95, \"reasoning\":\"Write detailed diagnostic reasoning\", \"reproductionSteps\":\"1. Step 1\\n2. Step 2\\n3. Step 3\"}",
+                testName, errorMessage, 
+                stackTrace != null && stackTrace.length() > 300 ? stackTrace.substring(0, 300) : stackTrace,
+                historicalContext != null ? historicalContext : "No prior flakiness history"
         );
 
         try {

@@ -127,16 +127,23 @@ public class MpinService {
     }
 
     private Optional<User> findUserByIdentifier(String identifier) {
+        if (identifier == null || identifier.isBlank()) return Optional.empty();
+        String cleanId = identifier.trim();
+
         // Try CIF Number
-        Optional<User> byCif = userRepository.findByCifNumber(identifier);
+        Optional<User> byCif = userRepository.findByCifNumber(cleanId);
         if (byCif.isPresent()) return byCif;
 
         // Try Email
-        Optional<User> byEmail = userRepository.findByEmail(identifier.toLowerCase());
+        Optional<User> byEmail = userRepository.findByEmail(cleanId.toLowerCase());
         if (byEmail.isPresent()) return byEmail;
 
+        // Try Phone Number
+        Optional<User> byPhone = userRepository.findByPhoneNumber(cleanId);
+        if (byPhone.isPresent()) return byPhone;
+
         // Try Account Number
-        Optional<Account> byAcc = accountRepository.findByAccountNumber(identifier);
+        Optional<Account> byAcc = accountRepository.findByAccountNumber(cleanId);
         if (byAcc.isPresent()) return Optional.of(byAcc.get().getUser());
 
         return Optional.empty();
