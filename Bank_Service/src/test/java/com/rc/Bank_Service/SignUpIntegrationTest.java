@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -32,13 +33,14 @@ public class SignUpIntegrationTest {
     @Test
     @DisplayName("Should successfully register customer")
     void testSignUpSuccess() throws Exception {
+        String randomSuffix = UUID.randomUUID().toString().substring(0, 5);
         SignUpRequest request = new SignUpRequest(
                 "Test User One",
-                "test.user.one@example.com",
+                "test.user." + randomSuffix + "@example.com",
                 "SecureP@ssword123",
-                "9876543201",
-                "ABCPE1231F",
-                "234567890123",
+                "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
+                "ABCPE" + String.format("%04d", (int)(Math.random() * 10000)) + "F",
+                "347892147890", // Mathematically valid Verhoeff Aadhaar
                 LocalDate.of(1990, 1, 1),
                 "MALE",
                 "123 Street, Bengaluru",

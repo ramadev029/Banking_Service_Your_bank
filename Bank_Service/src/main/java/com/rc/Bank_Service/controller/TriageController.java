@@ -77,52 +77,73 @@ public class TriageController {
         String suiteName = extractStringContent(payload.get("suiteName"));
         if (suiteName == null || suiteName.isBlank()) suiteName = "Automated Banking Test Suite";
 
-        List<TriageReportParser.ParsedFailureRecord> failures;
-        if (xmlContent != null && !xmlContent.isBlank()) {
-            failures = reportParser.parseJunitXml(xmlContent);
-        } else if (jsonContent != null && !jsonContent.isBlank()) {
-            failures = reportParser.parseNewmanJson(jsonContent);
-        } else {
-            failures = List.of();
-        }
+        TriageReportParser.ParsedReport report = reportParser.parseFullJunitXml(xmlContent, suiteName);
 
-        int totalTests = Math.max(failures.size(), 5);
-        int failedCount = failures.size();
-        int passedCount = totalTests - failedCount;
+        int totalTests = report.getTotalTests() > 0 ? report.getTotalTests() : 5;
+        int failedCount = report.getFailedCount();
+        int passedCount = report.getPassedCount();
+        long durationMs = report.getDurationMs() > 0 ? report.getDurationMs() : 4500;
 
-        TestRun testRun = new TestRun(suiteName, totalTests, passedCount, failedCount, 4500);
+        TestRun testRun = new TestRun(report.getSuiteName(), totalTests, passedCount, failedCount, durationMs);
         testRunRepository.save(testRun);
 
-        List<FailureClassification> classifiedResults = failures.stream().map(f -> {
+        List<FailureClassification> classifiedResults = new java.util.ArrayList<>();
+
+        for (TriageReportParser.ParsedRecord record : report.getRecords()) {
             // Save execution history record for database Module 2
             TestExecutionHistory history = new TestExecutionHistory(
-                f.getTestName(),
-                f.getClassName(),
-                "FAIL",
-                f.getErrorMessage(),
-                f.getStackTrace(),
-                f.getDurationMs()
+                record.getTestName(),
+                record.getClassName(),
+                record.getStatus(),
+                record.getErrorMessage(),
+                record.getStackTrace(),
+                record.getDurationMs()
             );
             testExecutionHistoryRepository.save(history);
 
-            // Update flakiness metrics
-            flakinessTrackerService.updateFlakinessScore(f.getTestName());
+            // Update flakiness metrics (Module 4)
+            flakinessTrackerService.updateFlakinessScore(record.getTestName());
 
-            // Run AI Classification & save
-            return classifierService.classifyAndSave(f.getTestName(), f.getErrorMessage(), f.getStackTrace());
-        }).toList();
+            // Run AI Classification & save for failed tests (Module 3)
+            if ("FAIL".equalsIgnoreCase(record.getStatus())) {
+                FailureClassification fc = classifierService.classifyAndSave(record.getTestName(), record.getErrorMessage(), record.getStackTrace());
+                classifiedResults.add(fc);
+            }
+        }
+
+        // Fallback if legacy Newman or failure-only payload was received
+        if (report.getRecords().isEmpty()) {
+            List<TriageReportParser.ParsedFailureRecord> failures;
+            if (xmlContent != null && !xmlContent.isBlank()) {
+                failures = reportParser.parseJunitXml(xmlContent);
+            } else if (jsonContent != null && !jsonContent.isBlank()) {
+                failures = reportParser.parseNewmanJson(jsonContent);
+            } else {
+                failures = List.of();
+            }
+
+            for (TriageReportParser.ParsedFailureRecord f : failures) {
+                TestExecutionHistory history = new TestExecutionHistory(
+                    f.getTestName(), f.getClassName(), "FAIL", f.getErrorMessage(), f.getStackTrace(), f.getDurationMs()
+                );
+                testExecutionHistoryRepository.save(history);
+                flakinessTrackerService.updateFlakinessScore(f.getTestName());
+                classifiedResults.add(classifierService.classifyAndSave(f.getTestName(), f.getErrorMessage(), f.getStackTrace()));
+            }
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("runId", testRun.getId());
-        response.put("totalFailures", failures.size());
+        response.put("totalFailures", classifiedResults.size());
         response.put("classifications", classifiedResults);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/dashboard-summary")
     public ResponseEntity<Map<String, Object>> getDashboardSummary() {
+        List<FailureClassification> allClassifications = failureClassificationRepository.findAll();
         List<FailureClassification> recentClassifications = failureClassificationRepository.findTop20ByOrderByCreatedAtDesc();
-        List<FailureClassification> pendingApprovalDrafts = failureClassificationRepository.findByIsHumanApprovedFalseOrderByCreatedAtDesc();
+        List<FailureClassification> pendingApprovalDrafts = failureClassificationRepository.findByCategoryAndIsHumanApprovedFalseOrderByCreatedAtDesc("GENUINE_FUNCTIONAL_DEFECT");
         List<FlakinessMetrics> quarantinedTests = flakinessMetricsRepository.findByIsQuarantinedTrue();
         List<FlakinessMetrics> topFlakyTests = flakinessMetricsRepository.findTop10ByOrderByFlakinessScoreDesc();
 
@@ -132,13 +153,14 @@ public class TriageController {
         categoryCounts.put("ENVIRONMENT_DATA_ISSUE", 0);
         categoryCounts.put("TEST_SCRIPT_ISSUE", 0);
 
-        for (FailureClassification fc : recentClassifications) {
+        for (FailureClassification fc : allClassifications) {
             String cat = fc.getCategory();
-            categoryCounts.put(cat, categoryCounts.getOrDefault(cat, 0) + 1);
+            if (cat != null) {
+                categoryCounts.put(cat, categoryCounts.getOrDefault(cat, 0) + 1);
+            }
         }
 
-        double suiteHealthScore = 100.0 - (quarantinedTests.size() * 5.0) - (pendingApprovalDrafts.size() * 10.0);
-        if (suiteHealthScore < 0) suiteHealthScore = 0.0;
+        double suiteHealthScore = Math.max(0.0, 100.0 - (quarantinedTests.size() * 2.5) - (pendingApprovalDrafts.size() * 2.0));
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("suiteHealthScore", suiteHealthScore);

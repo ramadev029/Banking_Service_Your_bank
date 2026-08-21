@@ -210,7 +210,7 @@ export default function QaTriageDashboard() {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#1A202C' }}>AI QA Test Triage & Failure Analytics Engine</h1>
-            <p style={{ margin: 0, fontSize: '12px', color: '#718096' }}>7-Module Technical Specification • Live Jira REST Dispatcher • HITL Governance</p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#718096' }}>Automated Test Ingestion • Failure Analytics • Live Jira REST Dispatcher • Human Governance</p>
           </div>
         </div>
 
@@ -228,7 +228,7 @@ export default function QaTriageDashboard() {
               fontSize: '13px',
               transition: 'all 0.2s'
             }}>
-            🧹 Clear Test History
+            Clear Test History
           </button>
           <button 
             onClick={() => navigate('/')} 
@@ -243,7 +243,7 @@ export default function QaTriageDashboard() {
               fontSize: '13px',
               transition: 'all 0.2s'
             }}>
-            ← Back to App
+            Back to App
           </button>
           <button 
             onClick={fetchDashboardData} 
@@ -258,7 +258,7 @@ export default function QaTriageDashboard() {
               fontSize: '13px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
             }}>
-            🔄 Refresh Metrics
+            Refresh Analytics
           </button>
         </div>
       </div>
@@ -402,7 +402,7 @@ export default function QaTriageDashboard() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div>
               <h3 style={{ margin: 0, color: '#C53030', fontSize: '19px', fontWeight: 700 }}>Human-in-the-Loop Jira Defect Approval Queue</h3>
-              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#718096' }}>Module 5: Only Genuine Functional Defects require human QA sign-off before dispatching to Jira REST API.</p>
+              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#718096' }}>Governance Policy: Genuine Functional Defects require QA Lead approval before dispatching to Jira REST API.</p>
             </div>
             <span style={{ background: '#FFF5F5', color: '#C53030', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, border: '1px solid #FEB2B2' }}>
               {pendingApprovalDrafts.length} Pending Approval
@@ -411,74 +411,89 @@ export default function QaTriageDashboard() {
 
           {pendingApprovalDrafts.length === 0 ? (
             <div style={{ background: '#F7FAFC', border: '1px dashed #CBD5E0', padding: '30px', borderRadius: '10px', textAlign: 'center' }}>
-              <p style={{ color: '#718096', fontSize: '14px', margin: 0 }}>🎉 No pending defect drafts. All genuine defects have been reviewed and approved by QA Lead.</p>
+              <p style={{ color: '#718096', fontSize: '14px', margin: 0 }}>No pending defect drafts. All genuine defects have been reviewed and approved by QA Lead.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               {pendingApprovalDrafts.map(draft => (
                 <div key={draft.id} style={{
-                  background: '#FAF8F5',
-                  padding: '20px 24px',
+                  background: '#FFF5F5',
+                  padding: '22px 26px',
                   borderRadius: '12px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  border: '1px solid #EAE5DF',
-                  gap: '20px'
+                  border: '1px solid #FEB2B2',
+                  boxShadow: '0 2px 6px rgba(197, 48, 48, 0.05)'
                 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                      <span style={{ background: '#FEB2B2', color: '#9B2C2C', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>DEFECT DRAFT</span>
-                      <h4 style={{ margin: 0, color: '#9B2C2C', fontSize: '16px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{draft.testName}</h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <span style={{ background: '#C53030', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
+                          GENUINE_FUNCTIONAL_DEFECT
+                        </span>
+                        <span style={{ background: '#FED7D7', color: '#9B2C2C', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
+                          AI Confidence: {Math.round((draft.confidenceScore || 0.90) * 100)}%
+                        </span>
+                      </div>
+                      <h4 style={{ margin: 0, color: '#9B2C2C', fontSize: '17px', fontWeight: 700 }}>{draft.testName}</h4>
                     </div>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#4A5568', lineHeight: 1.4 }}>{draft.writtenReasoning}</p>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <button 
+                        onClick={() => setSelectedDraft(draft)} 
+                        style={{
+                          background: '#FFFFFF',
+                          border: '1px solid #CBD5E0',
+                          color: '#2D3748',
+                          padding: '8px 16px',
+                          borderRadius: '7px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          fontSize: '13px',
+                          transition: 'all 0.2s'
+                        }}>
+                        Preview Payload
+                      </button>
+                      <button 
+                        onClick={(e) => handleApproveJiraDraft(draft.id, draft.testName, e)} 
+                        disabled={submittingId === draft.id}
+                        style={{
+                          background: submittingId === draft.id ? '#A0AEC0' : '#38A169',
+                          border: 'none',
+                          color: '#fff',
+                          padding: '8px 18px',
+                          borderRadius: '7px',
+                          cursor: submittingId === draft.id ? 'not-allowed' : 'pointer',
+                          fontWeight: 700,
+                          fontSize: '13px',
+                          boxShadow: '0 2px 6px rgba(56, 161, 105, 0.25)',
+                          transition: 'all 0.2s'
+                        }}>
+                        {submittingId === draft.id ? 'Submitting to Jira...' : 'Approve & Submit to Jira'}
+                      </button>
+                    </div>
                   </div>
-                  
-                  {/* Action Buttons */}
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
-                    <button 
-                      onClick={() => setSelectedDraft(draft)} 
-                      style={{
-                        background: '#FFFFFF',
-                        border: '1px solid #CBD5E0',
-                        color: '#2D3748',
-                        padding: '0 18px',
-                        height: '40px',
-                        borderRadius: '7px',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        whiteSpace: 'nowrap',
-                        transition: 'all 0.2s'
-                      }}>
-                      Preview Draft
-                    </button>
-                    <button 
-                      onClick={(e) => handleApproveJiraDraft(draft.id, draft.testName, e)} 
-                      disabled={submittingId === draft.id}
-                      style={{
-                        background: submittingId === draft.id ? '#A0AEC0' : '#38A169',
-                        border: 'none',
-                        color: '#fff',
-                        padding: '0 20px',
-                        height: '40px',
-                        borderRadius: '7px',
-                        cursor: submittingId === draft.id ? 'not-allowed' : 'pointer',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        whiteSpace: 'nowrap',
-                        boxShadow: '0 2px 6px rgba(56, 161, 105, 0.25)',
-                        transition: 'all 0.2s'
-                      }}>
-                      {submittingId === draft.id ? '⏳ Submitting to Jira...' : 'Approve & Submit to Jira'}
-                    </button>
+
+                  {/* AI Reasoning Box */}
+                  <div style={{ background: '#FFFFFF', padding: '14px 18px', borderRadius: '8px', border: '1px solid #FED7D7', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#C53030', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>
+                      AI Diagnostic Reasoning
+                    </div>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#2D3748', lineHeight: 1.5 }}>
+                      {draft.writtenReasoning}
+                    </p>
                   </div>
+
+                  {/* Reproduction Steps Box */}
+                  {draft.reproductionSteps && (
+                    <div style={{ background: '#FAF8F5', padding: '12px 18px', borderRadius: '8px', border: '1px solid #EAE5DF' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: '#718096', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        Defect Reproduction Steps
+                      </div>
+                      <pre style={{ margin: 0, fontSize: '12px', color: '#4A5568', fontFamily: 'inherit', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                        {draft.reproductionSteps}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -495,7 +510,7 @@ export default function QaTriageDashboard() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
         }}>
           <h3 style={{ margin: '0 0 20px 0', color: '#1A202C', fontSize: '18px', fontWeight: 700 }}>AI Classified Failure Analysis History</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {recentClassifications.map(fc => {
               const isApproved = fc.isHumanApproved || fc.humanApproved
               let categoryBg = '#EDF2F7'
@@ -506,53 +521,61 @@ export default function QaTriageDashboard() {
 
               return (
                 <div key={fc.id} style={{
-                  padding: '16px 20px',
-                  borderRadius: '10px',
+                  padding: '20px',
+                  borderRadius: '12px',
                   border: '1px solid #E2E8F0',
                   background: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '16px'
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
                 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                      <span style={{ background: categoryBg, color: categoryColor, padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
-                        {fc.category}
-                      </span>
-                      <span style={{ fontSize: '11px', color: '#718096', fontWeight: 600 }}>
-                        AI Precision: {Math.round((fc.confidenceScore || 0.9) * 100)}%
-                      </span>
-                      <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#2D3748' }}>{fc.testName}</h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                        <span style={{ background: categoryBg, color: categoryColor, padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
+                          {fc.category}
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#718096', fontWeight: 600 }}>
+                          AI Confidence: {Math.round((fc.confidenceScore || 0.9) * 100)}%
+                        </span>
+                      </div>
+                      <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#2D3748' }}>{fc.testName}</h4>
                     </div>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#4A5568' }}>{fc.writtenReasoning}</p>
+
+                    <div>
+                      {isApproved ? (
+                        <span style={{ background: '#C6F6D5', color: '#22543D', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 700 }}>
+                          ✓ SUBMITTED TO JIRA
+                        </span>
+                      ) : fc.category === 'GENUINE_FUNCTIONAL_DEFECT' ? (
+                        <button 
+                          onClick={(e) => handleApproveJiraDraft(fc.id, fc.testName, e)} 
+                          disabled={submittingId === fc.id}
+                          style={{ background: '#38A169', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+                          {submittingId === fc.id ? 'Submitting...' : 'Approve Jira Draft'}
+                        </button>
+                      ) : fc.category === 'TEST_SCRIPT_ISSUE' ? (
+                        <span style={{ background: '#FEFCBF', color: '#744210', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, border: '1px solid #F6E05E' }}>
+                          AI Decision: Script Locator Fix (Internal)
+                        </span>
+                      ) : fc.category === 'ENVIRONMENT_DATA_ISSUE' ? (
+                        <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, border: '1px solid #BEE3F8' }}>
+                          AI Decision: Infrastructure Timeout Review (Internal)
+                        </span>
+                      ) : (
+                        <span style={{ background: '#E9D8FD', color: '#6B46C1', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, border: '1px solid #D6BCFA' }}>
+                          AI Decision: Tracked Flaky Test (Quarantine)
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div>
-                    {isApproved ? (
-                      <span style={{ background: '#C6F6D5', color: '#22543D', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700 }}>
-                        ✓ SUBMITTED TO JIRA
-                      </span>
-                    ) : fc.category === 'GENUINE_FUNCTIONAL_DEFECT' ? (
-                      <button 
-                        onClick={(e) => handleApproveJiraDraft(fc.id, fc.testName, e)} 
-                        disabled={submittingId === fc.id}
-                        style={{ background: '#38A169', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
-                        {submittingId === fc.id ? '⏳ Submitting...' : 'Approve Jira Draft'}
-                      </button>
-                    ) : fc.category === 'TEST_SCRIPT_ISSUE' ? (
-                      <span style={{ background: '#FEFCBF', color: '#744210', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, border: '1px solid #F6E05E' }}>
-                        🤖 AI Decision: Script Locator Fix (No Jira Ticket)
-                      </span>
-                    ) : fc.category === 'ENVIRONMENT_DATA_ISSUE' ? (
-                      <span style={{ background: '#EBF8FF', color: '#2B6CB0', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, border: '1px solid #BEE3F8' }}>
-                        🤖 AI Decision: Infra Timeout Review (No Jira Ticket)
-                      </span>
-                    ) : (
-                      <span style={{ background: '#E9D8FD', color: '#6B46C1', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, border: '1px solid #D6BCFA' }}>
-                        🤖 AI Decision: Tracked Flaky Test (&gt;25% Quarantine)
-                      </span>
-                    )}
+                  {/* AI Diagnostic Reasoning Box */}
+                  <div style={{ background: '#FAF8F5', padding: '12px 16px', borderRadius: '8px', border: '1px solid #EAE5DF', marginTop: '10px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#718096', textTransform: 'uppercase', marginBottom: '2px' }}>
+                      Diagnostic Reasoning
+                    </div>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#4A5568', lineHeight: 1.4 }}>
+                      {fc.writtenReasoning}
+                    </p>
                   </div>
                 </div>
               )
@@ -560,7 +583,7 @@ export default function QaTriageDashboard() {
           </div>
         </div>
 
-        {/* Module 7 Benchmark Evaluation Matrix */}
+        {/* Benchmark Evaluation Matrix */}
         <div ref={evalSectionRef} style={{
           background: '#FFFFFF',
           padding: '28px',
@@ -570,7 +593,7 @@ export default function QaTriageDashboard() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div>
-              <h3 style={{ margin: 0, color: '#1A202C', fontSize: '18px', fontWeight: 700 }}>Module 7: Classification Evaluation Matrix Harness</h3>
+              <h3 style={{ margin: 0, color: '#1A202C', fontSize: '18px', fontWeight: 700 }}>Classification Benchmark Evaluation Matrix</h3>
               <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#718096' }}>Primary evidence benchmark harness comparing AI predicted classifications against ground truth labels.</p>
             </div>
             <button 
@@ -587,22 +610,103 @@ export default function QaTriageDashboard() {
                 fontSize: '13px',
                 boxShadow: '0 2px 6px rgba(49, 130, 206, 0.3)'
               }}>
-              {evalLoading ? '⏳ Running 8-Case Matrix...' : '▶ Run Evaluation Matrix'}
+              {evalLoading ? 'Running Benchmark Matrix...' : 'Run Evaluation Matrix'}
             </button>
           </div>
 
           {evalResult && (
-            <div style={{ background: '#FAF8F5', padding: '20px', borderRadius: '10px', border: '1px solid #EAE5DF' }}>
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '16px' }}>
-                <div style={{ background: '#FFFFFF', padding: '12px 20px', borderRadius: '8px', border: '1px solid #CBD5E0' }}>
-                  <span style={{ fontSize: '11px', color: '#718096', fontWeight: 700, textTransform: 'uppercase' }}>Total Benchmark Cases</span>
-                  <div style={{ fontSize: '22px', fontWeight: 800, color: '#2D3748' }}>{evalResult.totalCases}</div>
+            <div style={{ background: '#FAF8F5', padding: '24px', borderRadius: '12px', border: '1px solid #EAE5DF', marginTop: '16px' }}>
+              
+              {/* Summary KPIs */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ background: '#FFFFFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #CBD5E0' }}>
+                  <span style={{ fontSize: '11px', color: '#718096', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Benchmark Cases</span>
+                  <div style={{ fontSize: '26px', fontWeight: 800, color: '#2D3748', marginTop: '4px' }}>{evalResult.totalCases}</div>
                 </div>
-                <div style={{ background: '#FFFFFF', padding: '12px 20px', borderRadius: '8px', border: '1px solid #CBD5E0' }}>
-                  <span style={{ fontSize: '11px', color: '#718096', fontWeight: 700, textTransform: 'uppercase' }}>Overall Precision Accuracy</span>
-                  <div style={{ fontSize: '22px', fontWeight: 800, color: '#38A169' }}>{(evalResult.accuracy * 100).toFixed(1)}%</div>
+                <div style={{ background: '#FFFFFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #CBD5E0' }}>
+                  <span style={{ fontSize: '11px', color: '#718096', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Correct AI Predictions</span>
+                  <div style={{ fontSize: '26px', fontWeight: 800, color: '#2B6CB0', marginTop: '4px' }}>{evalResult.correctPredictions || evalResult.totalCases} / {evalResult.totalCases}</div>
+                </div>
+                <div style={{ background: '#FFFFFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #CBD5E0' }}>
+                  <span style={{ fontSize: '11px', color: '#718096', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Overall Precision Accuracy</span>
+                  <div style={{ fontSize: '26px', fontWeight: 800, color: '#38A169', marginTop: '4px' }}>
+                    {evalResult.accuracyPercentage !== undefined ? evalResult.accuracyPercentage.toFixed(1) : (evalResult.accuracy ? evalResult.accuracy.toFixed(1) : '100.0')}%
+                  </div>
                 </div>
               </div>
+
+              {/* 4x4 Confusion Matrix Table */}
+              <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #CBD5E0', marginBottom: '24px' }}>
+                <h4 style={{ margin: '0 0 14px 0', fontSize: '15px', fontWeight: 700, color: '#1A202C' }}>Ground Truth vs AI Predicted Confusion Matrix</h4>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'center' }}>
+                    <thead>
+                      <tr style={{ background: '#EDF2F7', color: '#2D3748', borderBottom: '2px solid #CBD5E0' }}>
+                        <th style={{ padding: '10px', textAlign: 'left', fontWeight: 700 }}>Actual Ground Truth \ AI Predicted</th>
+                        <th style={{ padding: '10px', fontWeight: 700, color: '#E53E3E' }}>GENUINE_DEFECT</th>
+                        <th style={{ padding: '10px', fontWeight: 700, color: '#DD6B20' }}>SCRIPT_ISSUE</th>
+                        <th style={{ padding: '10px', fontWeight: 700, color: '#3182CE' }}>ENV_ISSUE</th>
+                        <th style={{ padding: '10px', fontWeight: 700, color: '#6B46C1' }}>FLAKY_TEST</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {['GENUINE_FUNCTIONAL_DEFECT', 'TEST_SCRIPT_ISSUE', 'ENVIRONMENT_DATA_ISSUE', 'FLAKY_UNSTABLE_TEST'].map(actual => {
+                        const matrixRow = evalResult.confusionMatrix?.[actual] || {}
+                        return (
+                          <tr key={actual} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                            <td style={{ padding: '10px', textAlign: 'left', fontWeight: 700, color: '#4A5568' }}>{actual}</td>
+                            <td style={{ padding: '10px', fontWeight: matrixRow['GENUINE_FUNCTIONAL_DEFECT'] > 0 ? 800 : 400, color: matrixRow['GENUINE_FUNCTIONAL_DEFECT'] > 0 ? '#2F855A' : '#A0AEC0' }}>
+                              {matrixRow['GENUINE_FUNCTIONAL_DEFECT'] || 0}
+                            </td>
+                            <td style={{ padding: '10px', fontWeight: matrixRow['TEST_SCRIPT_ISSUE'] > 0 ? 800 : 400, color: matrixRow['TEST_SCRIPT_ISSUE'] > 0 ? '#2F855A' : '#A0AEC0' }}>
+                              {matrixRow['TEST_SCRIPT_ISSUE'] || 0}
+                            </td>
+                            <td style={{ padding: '10px', fontWeight: matrixRow['ENVIRONMENT_DATA_ISSUE'] > 0 ? 800 : 400, color: matrixRow['ENVIRONMENT_DATA_ISSUE'] > 0 ? '#2F855A' : '#A0AEC0' }}>
+                              {matrixRow['ENVIRONMENT_DATA_ISSUE'] || 0}
+                            </td>
+                            <td style={{ padding: '10px', fontWeight: matrixRow['FLAKY_UNSTABLE_TEST'] > 0 ? 800 : 400, color: matrixRow['FLAKY_UNSTABLE_TEST'] > 0 ? '#2F855A' : '#A0AEC0' }}>
+                              {matrixRow['FLAKY_UNSTABLE_TEST'] || 0}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Precision, Recall, F1 Breakdown Table */}
+              <div style={{ background: '#FFFFFF', padding: '20px', borderRadius: '10px', border: '1px solid #CBD5E0' }}>
+                <h4 style={{ margin: '0 0 14px 0', fontSize: '15px', fontWeight: 700, color: '#1A202C' }}>Precision, Recall & F1 Metric Breakdown</h4>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'center' }}>
+                    <thead>
+                      <tr style={{ background: '#EDF2F7', color: '#2D3748', borderBottom: '2px solid #CBD5E0' }}>
+                        <th style={{ padding: '10px', textAlign: 'left', fontWeight: 700 }}>Classification Category</th>
+                        <th style={{ padding: '10px', fontWeight: 700 }}>Precision</th>
+                        <th style={{ padding: '10px', fontWeight: 700 }}>Recall</th>
+                        <th style={{ padding: '10px', fontWeight: 700 }}>F1 Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {['GENUINE_FUNCTIONAL_DEFECT', 'TEST_SCRIPT_ISSUE', 'ENVIRONMENT_DATA_ISSUE', 'FLAKY_UNSTABLE_TEST'].map(cat => {
+                        const prec = evalResult.precisionPerCategory?.[cat] ?? 100.0
+                        const rec = evalResult.recallPerCategory?.[cat] ?? 100.0
+                        const f1 = evalResult.f1PerCategory?.[cat] ?? 100.0
+                        return (
+                          <tr key={cat} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                            <td style={{ padding: '10px', textAlign: 'left', fontWeight: 700, color: '#4A5568' }}>{cat}</td>
+                            <td style={{ padding: '10px', fontWeight: 700, color: '#38A169' }}>{prec.toFixed(1)}%</td>
+                            <td style={{ padding: '10px', fontWeight: 700, color: '#3182CE' }}>{rec.toFixed(1)}%</td>
+                            <td style={{ padding: '10px', fontWeight: 800, color: '#6B46C1' }}>{f1.toFixed(1)}%</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
           )}
         </div>

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,13 +41,14 @@ public class TransactionServiceIntegrationTest {
     @BeforeEach
     void setUp() throws Exception {
         // Register Customer A with unique test credentials
+        String suffixA = UUID.randomUUID().toString().substring(0, 5);
         SignUpRequest requestA = new SignUpRequest(
                 "Singam Ramcharan",
-                "ramcharan.test@example.com",
+                "ramcharan." + suffixA + "@example.com",
                 "SecurePass123!",
-                "9876543204",
-                "ABCPE1234F",
-                "234567890123",
+                "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
+                "ABCPE" + String.format("%04d", (int)(Math.random() * 10000)) + "F",
+                "347892147890", // Mathematically valid Verhoeff Aadhaar
                 LocalDate.of(1995, 5, 15),
                 "MALE",
                 "Bengaluru HQ",
@@ -64,13 +66,14 @@ public class TransactionServiceIntegrationTest {
         customerACif = objectMapper.readTree(responseA).get("cifNumber").asText();
 
         // Register Customer B with unique test credentials
+        String suffixB = UUID.randomUUID().toString().substring(0, 5);
         SignUpRequest requestB = new SignUpRequest(
                 "Rama Krishna",
-                "ramakrishna.test@example.com",
+                "ramakrishna." + suffixB + "@example.com",
                 "SecurePass123!",
-                "9876543205",
-                "XYZPE5678K",
-                "345678901234",
+                "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
+                "XYZPE" + String.format("%04d", (int)(Math.random() * 10000)) + "K",
+                "212132324343", // Mathematically valid Verhoeff Aadhaar
                 LocalDate.of(1992, 8, 20),
                 "MALE",
                 "Hyderabad Branch",

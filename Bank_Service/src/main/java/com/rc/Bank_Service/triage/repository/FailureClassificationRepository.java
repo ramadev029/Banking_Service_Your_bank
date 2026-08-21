@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface FailureClassificationRepository extends JpaRepository<FailureClassification, Long> {
     List<FailureClassification> findByIsHumanApprovedFalseOrderByCreatedAtDesc();
+    List<FailureClassification> findByCategoryAndIsHumanApprovedFalseOrderByCreatedAtDesc(String category);
     List<FailureClassification> findTop20ByOrderByCreatedAtDesc();
 }
