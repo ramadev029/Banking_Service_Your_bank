@@ -30,6 +30,10 @@ public class FailureClassification {
 
     private boolean isHumanApproved = false;
 
+    private boolean isBenchmark = false;
+
+    private String suiteName;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -44,6 +48,17 @@ public class FailureClassification {
         this.jiraDraftPayload = jiraDraftPayload;
     }
 
+    public FailureClassification(String testName, String category, double confidenceScore, String writtenReasoning, String reproductionSteps, String jiraDraftPayload, boolean isBenchmark, String suiteName) {
+        this.testName = testName;
+        this.category = category;
+        this.confidenceScore = confidenceScore;
+        this.writtenReasoning = writtenReasoning;
+        this.reproductionSteps = reproductionSteps;
+        this.jiraDraftPayload = jiraDraftPayload;
+        this.isBenchmark = isBenchmark;
+        this.suiteName = suiteName;
+    }
+
     public Long getId() { return id; }
     public String getTestName() { return testName; }
     public String getCategory() { return category; }
@@ -52,6 +67,8 @@ public class FailureClassification {
     public String getReproductionSteps() { return reproductionSteps; }
     public String getJiraDraftPayload() { return jiraDraftPayload; }
     public boolean isHumanApproved() { return isHumanApproved; }
+    public boolean isBenchmark() { return isBenchmark; }
+    public String getSuiteName() { return suiteName; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public void setTestName(String testName) { this.testName = testName; }
@@ -61,4 +78,6 @@ public class FailureClassification {
     public void setReproductionSteps(String reproductionSteps) { this.reproductionSteps = reproductionSteps; }
     public void setJiraDraftPayload(String jiraDraftPayload) { this.jiraDraftPayload = jiraDraftPayload; }
     public void setHumanApproved(boolean humanApproved) { isHumanApproved = humanApproved; }
+    public void setBenchmark(boolean benchmark) { isBenchmark = benchmark; }
+    public void setSuiteName(String suiteName) { this.suiteName = suiteName; }
 }

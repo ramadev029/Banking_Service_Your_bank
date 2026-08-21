@@ -1,42 +1,28 @@
 package com.rc.Bank_Service.triage.service;
 
-import com.rc.Bank_Service.triage.eval.TriageEvaluationHarness;
-import com.rc.Bank_Service.triage.repository.FailureClassificationRepository;
-import com.rc.Bank_Service.triage.repository.FlakinessMetricsRepository;
-import com.rc.Bank_Service.triage.repository.TestExecutionHistoryRepository;
-import com.rc.Bank_Service.triage.repository.TestRunRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TriageDatabaseSeeder implements CommandLineRunner {
 
-    private final TestRunRepository testRunRepository;
-    private final TestExecutionHistoryRepository testExecutionHistoryRepository;
-    private final FailureClassificationRepository failureClassificationRepository;
-    private final FlakinessMetricsRepository flakinessMetricsRepository;
-    private final TriageEvaluationHarness evaluationHarness;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public TriageDatabaseSeeder(TestRunRepository testRunRepository,
-                                TestExecutionHistoryRepository testExecutionHistoryRepository,
-                                FailureClassificationRepository failureClassificationRepository,
-                                FlakinessMetricsRepository flakinessMetricsRepository,
-                                TriageEvaluationHarness evaluationHarness) {
-        this.testRunRepository = testRunRepository;
-        this.testExecutionHistoryRepository = testExecutionHistoryRepository;
-        this.failureClassificationRepository = failureClassificationRepository;
-        this.flakinessMetricsRepository = flakinessMetricsRepository;
-        this.evaluationHarness = evaluationHarness;
+    public TriageDatabaseSeeder(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void run(String... args) {
-        if (testRunRepository.count() == 0 || failureClassificationRepository.count() == 0) {
-            System.out.println("[TriageDatabaseSeeder] Seeding initial TrustBank QA Triage benchmark dataset into database...");
-            evaluationHarness.runEvaluation();
-            System.out.println("[TriageDatabaseSeeder] Database seeding complete! Test runs, execution history, flakiness metrics, and classifications populated.");
+        try {
+            jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS is_benchmark BOOLEAN DEFAULT FALSE;");
+            jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS suite_name VARCHAR(255);");
+        } catch (Exception e) {
+            System.err.println("[TriageDatabaseSeeder] Schema Migration Notice: " + e.getMessage());
         }
+        System.out.println("[TriageDatabaseSeeder] Live Jenkins CI/CD Ingestion Engine initialized and ready for automated test report ingestion.");
     }
 }

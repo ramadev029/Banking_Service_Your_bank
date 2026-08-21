@@ -153,9 +153,9 @@ public class TriageController {
 
     @GetMapping("/dashboard-summary")
     public ResponseEntity<Map<String, Object>> getDashboardSummary() {
-        List<FailureClassification> allClassifications = failureClassificationRepository.findAll();
-        List<FailureClassification> recentClassifications = failureClassificationRepository.findTop20ByOrderByCreatedAtDesc();
-        List<FailureClassification> pendingApprovalDrafts = failureClassificationRepository.findByCategoryAndIsHumanApprovedFalseOrderByCreatedAtDesc("GENUINE_FUNCTIONAL_DEFECT");
+        List<FailureClassification> liveClassifications = failureClassificationRepository.findByIsBenchmarkFalse();
+        List<FailureClassification> recentClassifications = failureClassificationRepository.findTop20ByIsBenchmarkFalseOrderByCreatedAtDesc();
+        List<FailureClassification> pendingApprovalDrafts = failureClassificationRepository.findByCategoryAndIsHumanApprovedFalseAndIsBenchmarkFalseOrderByCreatedAtDesc("GENUINE_FUNCTIONAL_DEFECT");
         List<FlakinessMetrics> quarantinedTests = flakinessMetricsRepository.findByIsQuarantinedTrue();
         List<FlakinessMetrics> topFlakyTests = flakinessMetricsRepository.findTop10ByOrderByFlakinessScoreDesc();
 
@@ -165,7 +165,7 @@ public class TriageController {
         categoryCounts.put("ENVIRONMENT_DATA_ISSUE", 0);
         categoryCounts.put("TEST_SCRIPT_ISSUE", 0);
 
-        for (FailureClassification fc : allClassifications) {
+        for (FailureClassification fc : liveClassifications) {
             String cat = fc.getCategory();
             if (cat != null) {
                 categoryCounts.put(cat, categoryCounts.getOrDefault(cat, 0) + 1);

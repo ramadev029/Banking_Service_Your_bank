@@ -119,7 +119,9 @@ public class TriageEvaluationHarness {
             com.rc.Bank_Service.triage.model.FailureClassification classification = triageClassifierService.classifyAndSave(
                     testCase.getTestName(),
                     testCase.getErrorMessage(),
-                    testCase.getStackTrace()
+                    testCase.getStackTrace(),
+                    true,
+                    "Module 7 Benchmark Evaluation Suite"
             );
 
             String predicted = classification.getCategory();

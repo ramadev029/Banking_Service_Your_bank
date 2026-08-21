@@ -63,6 +63,11 @@ public class TriageClassifierService {
 
     @Transactional
     public FailureClassification classifyAndSave(String testName, String errorMessage, String stackTrace) {
+        return classifyAndSave(testName, errorMessage, stackTrace, false, "Jenkins CI/CD Build");
+    }
+
+    @Transactional
+    public FailureClassification classifyAndSave(String testName, String errorMessage, String stackTrace, boolean isBenchmark, String suiteName) {
         ClassificationResult result = classifyFailure(testName, errorMessage, stackTrace);
         
         String jiraPayload = null;
@@ -80,7 +85,9 @@ public class TriageClassifierService {
                 result.getConfidenceScore(),
                 result.getWrittenReasoning(),
                 result.getReproductionSteps(),
-                jiraPayload
+                jiraPayload,
+                isBenchmark,
+                suiteName != null ? suiteName : "Jenkins CI/CD Build"
         );
 
         return failureClassificationRepository.save(classification);

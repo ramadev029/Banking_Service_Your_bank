@@ -11,4 +11,8 @@ public interface FailureClassificationRepository extends JpaRepository<FailureCl
     List<FailureClassification> findByIsHumanApprovedFalseOrderByCreatedAtDesc();
     List<FailureClassification> findByCategoryAndIsHumanApprovedFalseOrderByCreatedAtDesc(String category);
     List<FailureClassification> findTop20ByOrderByCreatedAtDesc();
+
+    List<FailureClassification> findByIsBenchmarkFalse();
+    List<FailureClassification> findTop20ByIsBenchmarkFalseOrderByCreatedAtDesc();
+    List<FailureClassification> findByCategoryAndIsHumanApprovedFalseAndIsBenchmarkFalseOrderByCreatedAtDesc(String category);
 }

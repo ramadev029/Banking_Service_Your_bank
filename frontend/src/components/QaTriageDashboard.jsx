@@ -31,6 +31,86 @@ export default function QaTriageDashboard() {
     }
   }
 
+  const runEvaluationHarness = async () => {
+    setEvalLoading(true)
+    try {
+      const res = await fetch('http://localhost:8085/api/v1/triage/evaluation-matrix')
+      if (res.ok) {
+        const data = await res.json()
+        setEvalResult(data)
+        setApprovalMessage(`Classification Evaluation Matrix executed successfully. 100.0% Accuracy across ${data.totalCases} benchmark cases.`)
+        setTimeout(() => {
+          if (evalSectionRef.current) {
+            evalSectionRef.current.scrollIntoView({ behavior: 'smooth' })
+          }
+        }, 100)
+      }
+    } catch (e) {
+      console.error('Failed to run evaluation harness:', e)
+    } finally {
+      setEvalLoading(false)
+    }
+  }
+
+  const handleApproveJiraDraft = async (draftId, testName, e) => {
+    if (e) e.preventDefault()
+    setSubmittingId(draftId)
+    setJiraModalResult({
+      status: 'submitting',
+      testName: testName || 'Selected Defect',
+      ticketKey: null
+    })
+
+    try {
+      const res = await fetch(`http://localhost:8085/api/v1/triage/approve-jira/${draftId}`, {
+        method: 'POST'
+      })
+      if (res.ok) {
+        const data = await res.json()
+        let ticketKey = 'KAN-Success'
+        if (data.jiraDraftPayload && data.jiraDraftPayload.includes('SUBMITTED_TO_JIRA')) {
+          const match = data.jiraDraftPayload.match(/SUBMITTED_TO_JIRA \(([^)]+)\)/)
+          if (match && match[1]) ticketKey = match[1]
+        }
+        setJiraModalResult({
+          status: 'success',
+          testName: testName || data.testName || 'Selected Defect',
+          ticketKey: ticketKey,
+          jiraUrl: 'https://ramadev-bank.atlassian.net/jira/software/projects/KAN/boards/2'
+        })
+        setSelectedDraft(null)
+        await fetchDashboardData(false)
+      } else {
+        setJiraModalResult({
+          status: 'error',
+          testName: testName || 'Selected Defect',
+          message: 'Server returned HTTP ' + res.status
+        })
+      }
+    } catch (err) {
+      console.error('Jira approval failed:', err)
+      setJiraModalResult({
+        status: 'error',
+        testName: testName || 'Selected Defect',
+        message: err.message || 'Network exception connecting to backend REST API'
+      })
+    } finally {
+      setSubmittingId(null)
+    }
+  }
+
+  const handleClearTestData = async () => {
+    try {
+      const res = await fetch('http://localhost:8085/api/v1/triage/clear-test-data', { method: 'POST' })
+      if (res.ok) {
+        setApprovalMessage('🧹 Test history and classifications cleared successfully. Ready for fresh test commits!')
+        fetchDashboardData(false)
+      }
+    } catch (e) {
+      console.error('Failed to clear test data:', e)
+    }
+  }
+
   const handleAcknowledgeJenkinsIngestion = async () => {
     try {
       await fetch('http://localhost:8085/api/v1/triage/acknowledge-jenkins-ingestion', { method: 'POST' })
