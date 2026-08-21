@@ -40,7 +40,7 @@ public class SignUpIntegrationTest {
                 "SecureP@ssword123",
                 "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
                 "ABCPE" + String.format("%04d", (int)(Math.random() * 10000)) + "F",
-                "347892147890", // Mathematically valid Verhoeff Aadhaar
+                com.rc.Bank_Service.util.VerhoeffAlgorithm.generateValidAadhaar(),
                 LocalDate.of(1990, 1, 1),
                 "MALE",
                 "123 Street, Bengaluru",

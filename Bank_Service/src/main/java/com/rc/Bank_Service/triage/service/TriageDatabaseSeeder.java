@@ -20,6 +20,11 @@ public class TriageDatabaseSeeder implements CommandLineRunner {
         try {
             jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS is_benchmark BOOLEAN DEFAULT FALSE;");
             jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS suite_name VARCHAR(255);");
+            jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS root_cause TEXT;");
+            jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS recommended_action TEXT;");
+            jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS jira_required BOOLEAN DEFAULT FALSE;");
+            jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS evidence_json TEXT;");
+            jdbcTemplate.execute("ALTER TABLE failure_classifications ADD COLUMN IF NOT EXISTS contradicting_evidence_json TEXT;");
         } catch (Exception e) {
             System.err.println("[TriageDatabaseSeeder] Schema Migration Notice: " + e.getMessage());
         }

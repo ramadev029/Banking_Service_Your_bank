@@ -30,6 +30,8 @@ public class VerhoeffAlgorithm {
         {7, 0, 4, 6, 9, 1, 3, 2, 5, 8}
     };
 
+    private static final int[] inv = {0, 4, 3, 2, 1, 5, 6, 7, 8, 9};
+
     public static boolean validateAadhaar(String aadhaar) {
         if (aadhaar == null || !aadhaar.matches("^[2-9]{1}[0-9]{11}$")) {
             return false;
@@ -46,5 +48,16 @@ public class VerhoeffAlgorithm {
         }
 
         return c == 0;
+    }
+
+    public static String generateValidAadhaar() {
+        String base11 = String.valueOf((long)(Math.random() * 70000000000L) + 20000000000L);
+        for (int k = 0; k <= 9; k++) {
+            String candidate = base11 + k;
+            if (validateAadhaar(candidate)) {
+                return candidate;
+            }
+        }
+        return base11 + "0";
     }
 }

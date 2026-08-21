@@ -34,6 +34,20 @@ public class FailureClassification {
 
     private String suiteName;
 
+    @Column(columnDefinition = "TEXT")
+    private String rootCause;
+
+    @Column(columnDefinition = "TEXT")
+    private String recommendedAction;
+
+    private boolean jiraRequired = false;
+
+    @Column(columnDefinition = "TEXT")
+    private String evidenceJson;
+
+    @Column(columnDefinition = "TEXT")
+    private String contradictingEvidenceJson;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -59,6 +73,22 @@ public class FailureClassification {
         this.suiteName = suiteName;
     }
 
+    public FailureClassification(String testName, String category, double confidenceScore, String writtenReasoning, String reproductionSteps, String jiraDraftPayload, boolean isBenchmark, String suiteName, String rootCause, String recommendedAction, boolean jiraRequired, String evidenceJson, String contradictingEvidenceJson) {
+        this.testName = testName;
+        this.category = category;
+        this.confidenceScore = confidenceScore;
+        this.writtenReasoning = writtenReasoning;
+        this.reproductionSteps = reproductionSteps;
+        this.jiraDraftPayload = jiraDraftPayload;
+        this.isBenchmark = isBenchmark;
+        this.suiteName = suiteName;
+        this.rootCause = rootCause;
+        this.recommendedAction = recommendedAction;
+        this.jiraRequired = jiraRequired;
+        this.evidenceJson = evidenceJson;
+        this.contradictingEvidenceJson = contradictingEvidenceJson;
+    }
+
     public Long getId() { return id; }
     public String getTestName() { return testName; }
     public String getCategory() { return category; }
@@ -69,6 +99,11 @@ public class FailureClassification {
     public boolean isHumanApproved() { return isHumanApproved; }
     public boolean isBenchmark() { return isBenchmark; }
     public String getSuiteName() { return suiteName; }
+    public String getRootCause() { return rootCause; }
+    public String getRecommendedAction() { return recommendedAction; }
+    public boolean isJiraRequired() { return jiraRequired; }
+    public String getEvidenceJson() { return evidenceJson; }
+    public String getContradictingEvidenceJson() { return contradictingEvidenceJson; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public void setTestName(String testName) { this.testName = testName; }
@@ -80,4 +115,9 @@ public class FailureClassification {
     public void setHumanApproved(boolean humanApproved) { isHumanApproved = humanApproved; }
     public void setBenchmark(boolean benchmark) { isBenchmark = benchmark; }
     public void setSuiteName(String suiteName) { this.suiteName = suiteName; }
+    public void setRootCause(String rootCause) { this.rootCause = rootCause; }
+    public void setRecommendedAction(String recommendedAction) { this.recommendedAction = recommendedAction; }
+    public void setJiraRequired(boolean jiraRequired) { this.jiraRequired = jiraRequired; }
+    public void setEvidenceJson(String evidenceJson) { this.evidenceJson = evidenceJson; }
+    public void setContradictingEvidenceJson(String contradictingEvidenceJson) { this.contradictingEvidenceJson = contradictingEvidenceJson; }
 }

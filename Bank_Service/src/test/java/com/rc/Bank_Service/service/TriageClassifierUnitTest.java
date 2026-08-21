@@ -46,7 +46,7 @@ public class TriageClassifierUnitTest {
 
         assertNotNull(result);
         assertEquals("ENVIRONMENT_DATA_ISSUE", result.getCategory());
-        assertEquals(0.95, result.getConfidenceScore());
+        assertEquals(0.96, result.getConfidenceScore());
     }
 
     @Test

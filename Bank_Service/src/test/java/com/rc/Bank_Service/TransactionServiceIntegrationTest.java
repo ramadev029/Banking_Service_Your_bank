@@ -34,6 +34,9 @@ public class TransactionServiceIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private com.rc.Bank_Service.repository.AccountRepository accountRepository;
+
     private String customerAAccNumber;
     private String customerBAccNumber;
     private String customerACif;
@@ -46,9 +49,9 @@ public class TransactionServiceIntegrationTest {
                 "Singam Ramcharan",
                 "ramcharan." + suffixA + "@example.com",
                 "SecurePass123!",
-                "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
-                "ABCPE" + String.format("%04d", (int)(Math.random() * 10000)) + "F",
-                "347892147890", // Mathematically valid Verhoeff Aadhaar
+                "9" + String.format("%09d", (int)(Math.random() * 899900000) + 100000000),
+                "ABCPE" + String.format("%04d", (int)(Math.random() * 8999) + 1000) + "F",
+                com.rc.Bank_Service.util.VerhoeffAlgorithm.generateValidAadhaar(),
                 LocalDate.of(1995, 5, 15),
                 "MALE",
                 "Bengaluru HQ",
@@ -65,20 +68,25 @@ public class TransactionServiceIntegrationTest {
         customerAAccNumber = objectMapper.readTree(responseA).get("accountNumber").asText();
         customerACif = objectMapper.readTree(responseA).get("cifNumber").asText();
 
+        // Seed Customer A with 10,000 balance for transfer testing
+        com.rc.Bank_Service.model.Account accA = accountRepository.findByAccountNumber(customerAAccNumber).orElseThrow();
+        accA.setBalance(new BigDecimal("10000.00"));
+        accountRepository.save(accA);
+
         // Register Customer B with unique test credentials
         String suffixB = UUID.randomUUID().toString().substring(0, 5);
         SignUpRequest requestB = new SignUpRequest(
                 "Rama Krishna",
                 "ramakrishna." + suffixB + "@example.com",
                 "SecurePass123!",
-                "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
-                "XYZPE" + String.format("%04d", (int)(Math.random() * 10000)) + "K",
-                "212132324343", // Mathematically valid Verhoeff Aadhaar
+                "9" + String.format("%09d", (int)(Math.random() * 899900000) + 100000000),
+                "XYZPE" + String.format("%04d", (int)(Math.random() * 8999) + 1000) + "K",
+                com.rc.Bank_Service.util.VerhoeffAlgorithm.generateValidAadhaar(),
                 LocalDate.of(1992, 8, 20),
                 "MALE",
                 "Hyderabad Branch",
                 "SAVINGS_REGULAR",
-                "654321"
+                "840291"
         );
 
         String responseB = mockMvc.perform(post("/api/v1/auth/signup")
@@ -124,7 +132,7 @@ public class TransactionServiceIntegrationTest {
         mockMvc.perform(post("/api/v1/payments/upi")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(transferReq)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Invalid 6-Digit MPIN! Transaction authorization failed."));
     }
 
@@ -141,7 +149,7 @@ public class TransactionServiceIntegrationTest {
         mockMvc.perform(post("/api/v1/payments/upi")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(transferReq)))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Self-transfer not permitted. Recipient must be a different customer account."));
     }
 

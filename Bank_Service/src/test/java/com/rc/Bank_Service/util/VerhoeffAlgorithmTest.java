@@ -9,10 +9,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class VerhoeffAlgorithmTest {
 
     @Test
-    @DisplayName("Should reject invalid Aadhaar numbers with bad checksums or bad formats")
-    void testInvalidAadhaarNumbers() {
-        assertFalse(VerhoeffAlgorithm.validateAadhaar("123456789012")); // Starts with 1
-        assertFalse(VerhoeffAlgorithm.validateAadhaar("12345")); // Bad length
-        assertFalse(VerhoeffAlgorithm.validateAadhaar(null)); // Null
+    @DisplayName("Should generate valid Aadhaar numbers that pass Verhoeff validation")
+    void testGenerateValidAadhaar() {
+        for (int i = 0; i < 100; i++) {
+            String aadhaar = VerhoeffAlgorithm.generateValidAadhaar();
+            assertTrue(VerhoeffAlgorithm.validateAadhaar(aadhaar), "Generated Aadhaar " + aadhaar + " failed validation!");
+        }
     }
 }

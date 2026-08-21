@@ -40,7 +40,7 @@ public class EnterpriseSignUpIntegrationTest {
                 "SecureP@ssword123",
                 "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
                 "ABCPE" + String.format("%04d", (int)(Math.random() * 10000)) + "F",
-                "212132324343", // Mathematically valid Verhoeff Aadhaar
+                com.rc.Bank_Service.util.VerhoeffAlgorithm.generateValidAadhaar(),
                 LocalDate.of(1995, 5, 15),
                 "MALE",
                 "45, MG Road, Bengaluru, Karnataka",
@@ -66,8 +66,8 @@ public class EnterpriseSignUpIntegrationTest {
                 "fake.user." + randomSuffix + "@example.com",
                 "SecureP@ssword123",
                 "9" + String.format("%09d", (int)(Math.random() * 1000000000L)),
-                "XYZPE" + String.format("%04d", (int)(Math.random() * 10000)) + "K",
-                "234567890123", // Passes @Pattern(2-9 + 11 digits) but FAILS Verhoeff checksum
+                "XYZPE" + String.format("%04d", (int)(Math.random() * 8999) + 1000) + "K",
+                "299999999999", // Passes @Pattern(2-9 + 11 digits) but FAILS Verhoeff checksum
                 LocalDate.of(1998, 1, 1),
                 "MALE",
                 "Bengaluru",
