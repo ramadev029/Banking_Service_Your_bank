@@ -16,8 +16,8 @@ export default function QaTriageDashboard() {
   // Explicit Interactive Modal for Jira Dispatch Acknowledgement
   const [jiraModalResult, setJiraModalResult] = useState(null)
 
-  const fetchDashboardData = async () => {
-    setLoading(true)
+  const fetchDashboardData = async (showLoading = true) => {
+    if (showLoading) setLoading(true)
     try {
       const res = await fetch('http://localhost:8085/api/v1/triage/dashboard-summary')
       if (res.ok) {
@@ -27,95 +27,24 @@ export default function QaTriageDashboard() {
     } catch (e) {
       console.error('Failed to fetch triage summary:', e)
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
-  const runEvaluationHarness = async () => {
-    setEvalLoading(true)
+  const handleAcknowledgeJenkinsIngestion = async () => {
     try {
-      const res = await fetch('http://localhost:8085/api/v1/triage/evaluation-matrix')
-      if (res.ok) {
-        const data = await res.json()
-        setEvalResult(data)
-        setApprovalMessage(`Classification Evaluation Matrix executed successfully. 100.0% Accuracy across ${data.totalCases} benchmark cases.`)
-        setTimeout(() => {
-          if (evalSectionRef.current) {
-            evalSectionRef.current.scrollIntoView({ behavior: 'smooth' })
-          }
-        }, 100)
-      }
+      await fetch('http://localhost:8085/api/v1/triage/acknowledge-jenkins-ingestion', { method: 'POST' })
+      fetchDashboardData(false)
     } catch (e) {
-      console.error('Failed to run evaluation harness:', e)
-    } finally {
-      setEvalLoading(false)
-    }
-  }
-
-  const handleApproveJiraDraft = async (draftId, testName, e) => {
-    if (e) e.preventDefault()
-    setSubmittingId(draftId)
-    setJiraModalResult({
-      status: 'submitting',
-      testName: testName || 'Selected Defect',
-      ticketKey: null
-    })
-
-    try {
-      const res = await fetch(`http://localhost:8085/api/v1/triage/approve-jira/${draftId}`, {
-        method: 'POST'
-      })
-      if (res.ok) {
-        const data = await res.json()
-        let ticketKey = 'KAN-Success'
-        if (data.jiraDraftPayload && data.jiraDraftPayload.includes('SUBMITTED_TO_JIRA')) {
-          const match = data.jiraDraftPayload.match(/SUBMITTED_TO_JIRA \(([^)]+)\)/)
-          if (match && match[1]) ticketKey = match[1]
-        }
-        setJiraModalResult({
-          status: 'success',
-          testName: testName || data.testName || 'Selected Defect',
-          ticketKey: ticketKey,
-          jiraUrl: 'https://ramadev-bank.atlassian.net/jira/software/projects/KAN/boards/2'
-        })
-        setSelectedDraft(null)
-        await fetchDashboardData()
-      } else {
-        setJiraModalResult({
-          status: 'error',
-          testName: testName || 'Selected Defect',
-          message: 'Server returned HTTP ' + res.status
-        })
-      }
-    } catch (err) {
-      console.error('Jira approval failed:', err)
-      setJiraModalResult({
-        status: 'error',
-        testName: testName || 'Selected Defect',
-        message: err.message || 'Network exception connecting to backend REST API'
-      })
-    } finally {
-      setSubmittingId(null)
-    }
-  }
-
-  const handleClearTestData = async () => {
-    try {
-      const res = await fetch('http://localhost:8085/api/v1/triage/clear-test-data', { method: 'POST' })
-      if (res.ok) {
-        setApprovalMessage('🧹 Test history and classifications cleared successfully. Ready for fresh test commits!')
-        fetchDashboardData()
-      }
-    } catch (e) {
-      console.error('Failed to clear test data:', e)
+      console.error('Failed to acknowledge Jenkins ingestion:', e)
     }
   }
 
   useEffect(() => {
-    fetchDashboardData()
+    fetchDashboardData(true)
     const interval = setInterval(() => {
-      fetchDashboardData()
-    }, 10000) // Real-time auto-refresh every 10s for live Jenkins CI/CD ingestion
+      fetchDashboardData(false) // Silent background check for Jenkins ingestion notifications
+    }, 4000)
     return () => clearInterval(interval)
   }, [])
 
@@ -268,6 +197,58 @@ export default function QaTriageDashboard() {
       </div>
 
       <div style={{ maxWidth: '1280px', margin: '24px auto 0 auto', padding: '0 24px' }}>
+
+        {/* Live Jenkins Ingestion Acknowledgement Banner */}
+        {summary?.latestJenkinsIngestion && !summary.latestJenkinsIngestion.acknowledged && (
+          <div style={{
+            background: 'linear-gradient(135deg, #1A365D 0%, #2B6CB0 100%)',
+            border: '1px solid #4299E1',
+            color: '#FFFFFF',
+            padding: '18px 24px',
+            borderRadius: '14px',
+            marginBottom: '24px',
+            boxShadow: '0 6px 20px rgba(43, 108, 176, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ background: '#EBF8FF', color: '#2B6CB0', width: '44px', height: '44px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 800 }}>
+                🔔
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ background: '#3182CE', color: '#FFFFFF', padding: '2px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Jenkins Pipeline Ingestion Received
+                  </span>
+                  <span style={{ fontSize: '12px', color: '#BEE3F8', fontWeight: 600 }}>
+                    Received at {summary.latestJenkinsIngestion.timestamp}
+                  </span>
+                </div>
+                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#FFFFFF' }}>
+                  Jenkins Build Completed: Ingested {summary.latestJenkinsIngestion.totalTests || 0} Test Executions & Processed {summary.latestJenkinsIngestion.failedCount || 0} Failure Classifications
+                </h4>
+              </div>
+            </div>
+
+            <button
+              onClick={handleAcknowledgeJenkinsIngestion}
+              style={{
+                background: '#38A169',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 22px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: '13px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                transition: 'all 0.2s'
+              }}>
+              View Triage Analytics & Acknowledge
+            </button>
+          </div>
+        )}
 
         {/* Hero Banner Header Card */}
         <div style={{

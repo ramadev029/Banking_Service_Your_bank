@@ -58,6 +58,8 @@ public class TriageController {
         this.flakinessMetricsRepository = flakinessMetricsRepository;
     }
 
+    private static Map<String, Object> latestJenkinsIngestion = null;
+
     private String extractStringContent(Object raw) {
         if (raw == null) return null;
         if (raw instanceof List<?> list) {
@@ -132,6 +134,16 @@ public class TriageController {
             }
         }
 
+        // Set Live Jenkins Ingestion Notification Payload
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("timestamp", java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("hh:mm:ss a")));
+        notification.put("suiteName", testRun.getSuiteName());
+        notification.put("totalTests", totalTests);
+        notification.put("failedCount", classifiedResults.size());
+        notification.put("passedCount", passedCount);
+        notification.put("acknowledged", false);
+        latestJenkinsIngestion = notification;
+
         Map<String, Object> response = new HashMap<>();
         response.put("runId", testRun.getId());
         response.put("totalFailures", classifiedResults.size());
@@ -169,8 +181,17 @@ public class TriageController {
         summary.put("pendingApprovalDrafts", pendingApprovalDrafts);
         summary.put("quarantinedTests", quarantinedTests);
         summary.put("topFlakyTests", topFlakyTests);
+        summary.put("latestJenkinsIngestion", latestJenkinsIngestion);
 
         return ResponseEntity.ok(summary);
+    }
+
+    @PostMapping("/acknowledge-jenkins-ingestion")
+    public ResponseEntity<Map<String, String>> acknowledgeJenkinsIngestion() {
+        if (latestJenkinsIngestion != null) {
+            latestJenkinsIngestion.put("acknowledged", true);
+        }
+        return ResponseEntity.ok(Map.of("message", "Jenkins ingestion acknowledged successfully"));
     }
 
     @PostMapping("/approve-jira/{id}")
