@@ -113,6 +113,10 @@ export default function QaTriageDashboard() {
 
   useEffect(() => {
     fetchDashboardData()
+    const interval = setInterval(() => {
+      fetchDashboardData()
+    }, 10000) // Real-time auto-refresh every 10s for live Jenkins CI/CD ingestion
+    return () => clearInterval(interval)
   }, [])
 
   if (loading) {
