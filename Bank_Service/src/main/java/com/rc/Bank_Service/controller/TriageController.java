@@ -81,14 +81,6 @@ public class TriageController {
 
         TriageReportParser.ParsedReport report = reportParser.parseFullJunitXml(xmlContent, suiteName);
 
-        // Clear previous live non-benchmark classifications so dashboard reports reflect the LATEST pipeline run cleanly
-        if (!"Module 7 Benchmark Evaluation Suite".equalsIgnoreCase(suiteName) && !"Custom Uploaded Test Suite".equalsIgnoreCase(suiteName)) {
-            List<FailureClassification> oldLive = failureClassificationRepository.findByIsBenchmarkFalse();
-            if (!oldLive.isEmpty()) {
-                failureClassificationRepository.deleteAll(oldLive);
-            }
-        }
-
         int totalTests = report.getTotalTests() > 0 ? report.getTotalTests() : 5;
         int failedCount = report.getFailedCount();
         int passedCount = report.getPassedCount();
@@ -142,12 +134,24 @@ public class TriageController {
             }
         }
 
+        // Accumulate failures for multi-file Jenkins CI/CD batch runs within a 60-second window
+        int accumulatedFailures = classifiedResults.size();
+        if (latestJenkinsIngestion != null && latestJenkinsIngestion.get("batchTime") != null) {
+            java.time.LocalDateTime prevBatchTime = (java.time.LocalDateTime) latestJenkinsIngestion.get("batchTime");
+            long elapsedSeconds = java.time.Duration.between(prevBatchTime, java.time.LocalDateTime.now()).getSeconds();
+            if (elapsedSeconds < 60) {
+                int prevCount = (int) latestJenkinsIngestion.getOrDefault("failedCount", 0);
+                accumulatedFailures += prevCount;
+            }
+        }
+
         // Set Live Jenkins Ingestion Notification Payload
         Map<String, Object> notification = new HashMap<>();
         notification.put("timestamp", java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("hh:mm:ss a")));
+        notification.put("batchTime", java.time.LocalDateTime.now());
         notification.put("suiteName", testRun.getSuiteName());
         notification.put("totalTests", totalTests);
-        notification.put("failedCount", classifiedResults.size());
+        notification.put("failedCount", accumulatedFailures);
         notification.put("passedCount", passedCount);
         notification.put("acknowledged", false);
         latestJenkinsIngestion = notification;
@@ -161,9 +165,30 @@ public class TriageController {
 
     @GetMapping("/dashboard-summary")
     public ResponseEntity<Map<String, Object>> getDashboardSummary() {
-        List<FailureClassification> liveClassifications = failureClassificationRepository.findByIsBenchmarkFalse();
-        List<FailureClassification> recentClassifications = failureClassificationRepository.findTop20ByIsBenchmarkFalseOrderByCreatedAtDesc();
-        List<FailureClassification> pendingApprovalDrafts = failureClassificationRepository.findByCategoryAndIsHumanApprovedFalseAndIsBenchmarkFalseOrderByCreatedAtDesc("GENUINE_FUNCTIONAL_DEFECT");
+        List<FailureClassification> allLiveClassifications = failureClassificationRepository.findByIsBenchmarkFalse();
+        
+        // Filter classifications created within the latest Jenkins build batch run window (last 5 minutes of newest record)
+        List<FailureClassification> liveClassifications = new java.util.ArrayList<>();
+        if (!allLiveClassifications.isEmpty()) {
+            java.time.LocalDateTime newestTime = allLiveClassifications.stream()
+                    .map(FailureClassification::getCreatedAt)
+                    .filter(java.util.Objects::nonNull)
+                    .max(java.time.LocalDateTime::compareTo)
+                    .orElse(java.time.LocalDateTime.now());
+
+            java.time.LocalDateTime cutoff = newestTime.minusMinutes(5);
+            for (FailureClassification fc : allLiveClassifications) {
+                if (fc.getCreatedAt() != null && !fc.getCreatedAt().isBefore(cutoff)) {
+                    liveClassifications.add(fc);
+                }
+            }
+        }
+
+        List<FailureClassification> recentClassifications = liveClassifications.size() > 0 ? liveClassifications : failureClassificationRepository.findTop20ByIsBenchmarkFalseOrderByCreatedAtDesc();
+        List<FailureClassification> pendingApprovalDrafts = liveClassifications.stream()
+                .filter(fc -> "GENUINE_FUNCTIONAL_DEFECT".equalsIgnoreCase(fc.getCategory()) && !fc.isHumanApproved())
+                .collect(java.util.stream.Collectors.toList());
+        
         List<FlakinessMetrics> quarantinedTests = flakinessMetricsRepository.findByIsQuarantinedTrue();
         List<FlakinessMetrics> topFlakyTests = flakinessMetricsRepository.findTop10ByOrderByFlakinessScoreDesc();
 
