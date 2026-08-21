@@ -514,15 +514,34 @@ export default function QaTriageDashboard() {
           </div>
         </div>
 
-        {/* Right Column Cosmic Sphere Graphic */}
+      {/* CSS Animation Keyframes for Cosmic Graphic */}
+      <style>{`
+        @keyframes rotateCosmicSphere {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes pulseSphereCore {
+          0%, 100% { transform: scale(1); opacity: 0.85; }
+          50% { transform: scale(1.06); opacity: 1; }
+        }
+        .animated-cosmic-svg {
+          animation: rotateCosmicSphere 30s linear infinite;
+        }
+        .animated-sphere-core {
+          animation: pulseSphereCore 4s ease-in-out infinite;
+          transform-origin: center;
+        }
+      `}</style>
+
+      {/* Right Column Cosmic Sphere Graphic */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-          <svg width="340" height="340" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg className="animated-cosmic-svg" width="340" height="340" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="170" cy="170" r="160" stroke="#1E293B" strokeWidth="1" strokeDasharray="4 4" />
             <circle cx="170" cy="170" r="130" stroke="#334155" strokeWidth="1" strokeDasharray="2 6" />
             <ellipse cx="170" cy="170" rx="150" ry="60" stroke="#F97316" strokeWidth="1.5" opacity="0.4" transform="rotate(-25 170 170)" />
             <ellipse cx="170" cy="170" rx="150" ry="60" stroke="#8B5CF6" strokeWidth="1.5" opacity="0.4" transform="rotate(25 170 170)" />
             <ellipse cx="170" cy="170" rx="150" ry="60" stroke="#06B6D4" strokeWidth="1.5" opacity="0.3" transform="rotate(75 170 170)" />
-            <circle cx="170" cy="170" r="90" fill="url(#sphereGradient)" opacity="0.8" />
+            <circle className="animated-sphere-core" cx="170" cy="170" r="90" fill="url(#sphereGradient)" opacity="0.8" />
             <defs>
               <radialGradient id="sphereGradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(170 170) rotate(90) scale(90)">
                 <stop stopColor="#F97316" stopOpacity="0.8" />

@@ -81,6 +81,14 @@ public class TriageController {
 
         TriageReportParser.ParsedReport report = reportParser.parseFullJunitXml(xmlContent, suiteName);
 
+        // Clear previous live non-benchmark classifications so dashboard reports reflect the LATEST pipeline run cleanly
+        if (!"Module 7 Benchmark Evaluation Suite".equalsIgnoreCase(suiteName) && !"Custom Uploaded Test Suite".equalsIgnoreCase(suiteName)) {
+            List<FailureClassification> oldLive = failureClassificationRepository.findByIsBenchmarkFalse();
+            if (!oldLive.isEmpty()) {
+                failureClassificationRepository.deleteAll(oldLive);
+            }
+        }
+
         int totalTests = report.getTotalTests() > 0 ? report.getTotalTests() : 5;
         int failedCount = report.getFailedCount();
         int passedCount = report.getPassedCount();
