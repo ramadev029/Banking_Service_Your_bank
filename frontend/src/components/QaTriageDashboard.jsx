@@ -168,7 +168,7 @@ export default function QaTriageDashboard() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#141414',
+        background: '#090A0F',
         color: '#FFFFFF',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
@@ -176,13 +176,13 @@ export default function QaTriageDashboard() {
           <div style={{
             width: '48px',
             height: '48px',
-            border: '4px solid #333333',
-            borderTop: '4px solid #E50914',
+            border: '3px solid #1E2230',
+            borderTop: '3px solid #F97316',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 16px auto'
           }} />
-          <h3 style={{ fontWeight: 700, color: '#E5E5E5', fontSize: '18px', margin: 0 }}>Initializing AI Triage Engine...</h3>
+          <h3 style={{ fontWeight: 700, color: '#94A3B8', fontSize: '16px', margin: 0 }}>Initializing QA-Triage Agent...</h3>
         </div>
       </div>
     )
@@ -226,143 +226,324 @@ export default function QaTriageDashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#141414',
-      color: '#FFFFFF',
+      background: '#090A0F',
+      color: '#F8FAFC',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      paddingBottom: '60px'
+      paddingBottom: '80px'
     }}>
       
-      {/* Netflix Top Navigation Bar */}
+      {/* Navbar Matching Reference UI Design */}
       <div style={{
-        background: '#000000',
-        borderBottom: '1px solid #262626',
-        padding: '16px 40px',
+        background: '#0E111B',
+        borderBottom: '1px solid #1E2230',
+        padding: '14px 40px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.8)'
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{
-              background: '#E50914',
-              color: '#FFFFFF',
-              padding: '6px 14px',
-              borderRadius: '4px',
-              fontWeight: 900,
-              fontSize: '18px',
-              letterSpacing: '1px',
-              boxShadow: '0 2px 8px rgba(229, 9, 20, 0.4)'
-            }}>
-              NETFLIX
+        {/* Brand Logo & Name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="6" r="3" fill="#F97316"/>
+            <circle cx="26" cy="12" r="3" fill="#EC4899"/>
+            <circle cx="26" cy="24" r="3" fill="#8B5CF6"/>
+            <circle cx="16" cy="28" r="3" fill="#3B82F6"/>
+            <circle cx="6" cy="24" r="3" fill="#06B6D4"/>
+            <circle cx="6" cy="12" r="3" fill="#10B981"/>
+            <circle cx="16" cy="16" r="4" fill="#F43F5E"/>
+          </svg>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.2px' }}>
+              QA-Triage Agent
+            </h1>
+            <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 600, display: 'block', marginTop: '-2px' }}>
+              Enterprise QA Intelligence
             </span>
-            <span style={{ fontSize: '15px', fontWeight: 800, color: '#E5E5E5', letterSpacing: '0.5px' }}>
-              QA AI TRIAGE
-            </span>
-          </div>
-
-          {/* Landscape Tab Navigation */}
-          <div style={{ display: 'flex', background: '#1F1F1F', borderRadius: '8px', padding: '4px', border: '1px solid #333333' }}>
-            <button
-              onClick={() => setActiveTab('jenkins')}
-              style={{
-                background: activeTab === 'jenkins' ? '#E50914' : 'transparent',
-                color: activeTab === 'jenkins' ? '#FFFFFF' : '#A3A3A3',
-                border: 'none',
-                padding: '9px 22px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '13px',
-                transition: 'all 0.2s'
-              }}>
-              Jenkins Pipeline
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveTab('seeded')
-                if (!evalResult) runEvaluationHarness()
-              }}
-              style={{
-                background: activeTab === 'seeded' ? '#E50914' : 'transparent',
-                color: activeTab === 'seeded' ? '#FFFFFF' : '#A3A3A3',
-                border: 'none',
-                padding: '9px 22px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '13px',
-                transition: 'all 0.2s'
-              }}>
-              Run Seeded Tests
-            </button>
-
-            <button
-              onClick={() => setActiveTab('upload')}
-              style={{
-                background: activeTab === 'upload' ? '#E50914' : 'transparent',
-                color: activeTab === 'upload' ? '#FFFFFF' : '#A3A3A3',
-                border: 'none',
-                padding: '9px 22px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 700,
-                fontSize: '13px',
-                transition: 'all 0.2s'
-              }}>
-              Upload Test Case
-            </button>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-          <button 
-            onClick={handleClearTestData} 
+        {/* Header Tabs */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Tab 1: Jira Pipeline */}
+          <div
+            onClick={() => setActiveTab('jenkins')}
             style={{
-              background: '#262626',
-              border: '1px solid #404040',
-              color: '#D4D4D4',
-              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              background: activeTab === 'jenkins' ? '#171C2C' : 'transparent',
+              borderBottom: activeTab === 'jenkins' ? '2px solid #F97316' : '2px solid transparent',
+              transition: 'all 0.2s'
+            }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '6px',
+              background: '#26201B',
+              border: '1px solid #F97316',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#F97316',
+              fontSize: '12px'
+            }}>
+              ◆
+            </div>
+            <div>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: activeTab === 'jenkins' ? '#FFFFFF' : '#94A3B8', display: 'block' }}>
+                1. Jira Pipeline
+              </span>
+              <span style={{ fontSize: '10px', color: '#64748B', display: 'block' }}>
+                Create & Manage Tickets
+              </span>
+            </div>
+          </div>
+
+          {/* Tab 2: Run Seeded Tests */}
+          <div
+            onClick={() => {
+              setActiveTab('seeded')
+              if (!evalResult) runEvaluationHarness()
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              background: activeTab === 'seeded' ? '#171C2C' : 'transparent',
+              borderBottom: activeTab === 'seeded' ? '2px solid #F97316' : '2px solid transparent',
+              transition: 'all 0.2s'
+            }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: '#241728',
+              border: '1px solid #A855F7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#A855F7',
+              fontSize: '12px'
+            }}>
+              ▶
+            </div>
+            <div>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: activeTab === 'seeded' ? '#FFFFFF' : '#94A3B8', display: 'block' }}>
+                2. Run Seeded Tests
+              </span>
+              <span style={{ fontSize: '10px', color: '#64748B', display: 'block' }}>
+                Execute & Analyze
+              </span>
+            </div>
+          </div>
+
+          {/* Tab 3: Upload Tests */}
+          <div
+            onClick={() => setActiveTab('upload')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 18px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              background: activeTab === 'upload' ? '#171C2C' : 'transparent',
+              borderBottom: activeTab === 'upload' ? '2px solid #F97316' : '2px solid transparent',
+              transition: 'all 0.2s'
+            }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '6px',
+              background: '#182434',
+              border: '1px solid #3B82F6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#3B82F6',
+              fontSize: '12px'
+            }}>
+              ☁
+            </div>
+            <div>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: activeTab === 'upload' ? '#FFFFFF' : '#94A3B8', display: 'block' }}>
+                3. Upload Tests
+              </span>
+              <span style={{ fontSize: '10px', color: '#64748B', display: 'block' }}>
+                Add Test Suites
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Actions Header */}
+        <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+          <button
+            onClick={handleClearTestData}
+            style={{
+              background: '#161922',
+              border: '1px solid #282D3F',
+              color: '#94A3B8',
+              padding: '8px 14px',
               borderRadius: '6px',
               cursor: 'pointer',
               fontWeight: 600,
-              fontSize: '13px',
-              transition: 'all 0.2s'
+              fontSize: '12px'
             }}>
             Clear History
           </button>
-          <button 
-            onClick={() => navigate('/')} 
+          <button
+            onClick={() => navigate('/')}
             style={{
-              background: '#E50914',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '8px 18px',
+              background: '#161922',
+              border: '1px solid #282D3F',
+              color: '#94A3B8',
+              padding: '8px 14px',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '13px',
-              boxShadow: '0 2px 8px rgba(229, 9, 20, 0.3)'
+              fontWeight: 600,
+              fontSize: '12px'
             }}>
-            Back to Banking App
+            Back to App
           </button>
+          <div style={{
+            background: '#1E2333',
+            color: '#FFFFFF',
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 800,
+            fontSize: '13px',
+            border: '1px solid #3B82F6'
+          }}>
+            QA
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Section Matching Reference Layout */}
+      <div style={{
+        position: 'relative',
+        maxWidth: '1320px',
+        margin: '24px auto 0 auto',
+        padding: '36px 40px',
+        display: 'grid',
+        gridTemplateColumns: '1.2fr 0.8fr',
+        alignItems: 'center',
+        gap: '40px',
+        background: 'radial-gradient(ellipse at top left, #151A28 0%, #090A0F 70%)',
+        borderRadius: '20px',
+        border: '1px solid #1E2230',
+        overflow: 'hidden'
+      }}>
+        {/* Left Column Hero Content */}
+        <div>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: '#161922',
+            border: '1px solid #282D3F',
+            padding: '4px 14px',
+            borderRadius: '20px',
+            fontSize: '11px',
+            fontWeight: 700,
+            color: '#94A3B8',
+            letterSpacing: '0.5px',
+            marginBottom: '16px'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F97316' }} />
+            ENTERPRISE QA INTELLIGENCE
+          </div>
+
+          <h2 style={{
+            fontSize: '52px',
+            fontWeight: 900,
+            margin: '0 0 16px 0',
+            color: '#F8FAFC',
+            letterSpacing: '-1px',
+            lineHeight: 1.1
+          }}>
+            QA-Triage Agent
+          </h2>
+
+          <p style={{
+            fontSize: '15px',
+            color: '#94A3B8',
+            lineHeight: 1.6,
+            marginBottom: '24px',
+            maxWidth: '650px'
+          }}>
+            The Enterprise QA/ tester agent that can evaluate test suites of an application and classify them into the <span style={{ color: '#F59E0B', fontWeight: 700 }}>environmental</span>, <span style={{ color: '#38BDF8', fontWeight: 700 }}>script</span>, <span style={{ color: '#C084FC', fontWeight: 700 }}>flaky</span>, and <span style={{ color: '#F43F5E', fontWeight: 700 }}>genuine defect</span> and writes a jira draft ticket for genuine defects with a secure <span style={{ color: '#A855F7', fontWeight: 700 }}>HITL</span> review approval.
+          </p>
+
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '20px' }}>
+            <div style={{ background: '#161922', border: '1px solid #282D3F', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#F97316' }}>✓</span> AI-Powered
+            </div>
+            <span style={{ color: '#334155' }}>•</span>
+            <div style={{ background: '#161922', border: '1px solid #282D3F', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#A855F7' }}>✓</span> Intelligent
+            </div>
+            <span style={{ color: '#334155' }}>•</span>
+            <div style={{ background: '#161922', border: '1px solid #282D3F', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#3B82F6' }}>✓</span> Secure
+            </div>
+          </div>
+
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', background: '#111622', border: '1px solid #1E293B', padding: '10px 20px', borderRadius: '30px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#E2E8F0', fontSize: '13px', fontWeight: 600 }}>
+              <span style={{ color: '#10B981' }}>🛡</span> Secure HITL Review Approval
+            </div>
+            <div style={{ background: '#064E3B', color: '#34D399', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} /> Enabled
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column Cosmic Sphere Graphic */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+          <svg width="340" height="340" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="170" cy="170" r="160" stroke="#1E293B" strokeWidth="1" strokeDasharray="4 4" />
+            <circle cx="170" cy="170" r="130" stroke="#334155" strokeWidth="1" strokeDasharray="2 6" />
+            <ellipse cx="170" cy="170" rx="150" ry="60" stroke="#F97316" strokeWidth="1.5" opacity="0.4" transform="rotate(-25 170 170)" />
+            <ellipse cx="170" cy="170" rx="150" ry="60" stroke="#8B5CF6" strokeWidth="1.5" opacity="0.4" transform="rotate(25 170 170)" />
+            <ellipse cx="170" cy="170" rx="150" ry="60" stroke="#06B6D4" strokeWidth="1.5" opacity="0.3" transform="rotate(75 170 170)" />
+            <circle cx="170" cy="170" r="90" fill="url(#sphereGradient)" opacity="0.8" />
+            <defs>
+              <radialGradient id="sphereGradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(170 170) rotate(90) scale(90)">
+                <stop stopColor="#F97316" stopOpacity="0.8" />
+                <stop offset="0.5" stopColor="#8B5CF6" stopOpacity="0.4" />
+                <stop offset="1" stopColor="#090A0F" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+          </svg>
         </div>
       </div>
 
       <div style={{ maxWidth: '1320px', margin: '28px auto 0 auto', padding: '0 24px' }}>
 
-        {/* Global Toast Alert Banner */}
+        {/* Global Toast Alert */}
         {approvalMessage && (
           <div style={{
-            background: '#1C2E20',
-            border: '1px solid #22C55E',
-            color: '#4ADE80',
+            background: '#064E3B',
+            border: '1px solid #10B981',
+            color: '#A7F3D0',
             padding: '14px 24px',
-            borderRadius: '8px',
+            borderRadius: '10px',
             marginBottom: '24px',
             fontSize: '14px',
             fontWeight: 600,
@@ -372,29 +553,28 @@ export default function QaTriageDashboard() {
             boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
           }}>
             <span>{approvalMessage}</span>
-            <button onClick={() => setApprovalMessage('')} style={{ background: 'none', border: 'none', color: '#4ADE80', cursor: 'pointer', fontWeight: 700, fontSize: '16px' }}>✕</button>
+            <button onClick={() => setApprovalMessage('')} style={{ background: 'none', border: 'none', color: '#A7F3D0', cursor: 'pointer', fontWeight: 700, fontSize: '16px' }}>✕</button>
           </div>
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 1: JENKINS PIPELINE SECTION */}
+        {/* TAB 1: JIRA PIPELINE SECTION */}
         {/* ========================================================================= */}
         {activeTab === 'jenkins' && (
           <div>
-            {/* Scenario A: No Jenkins Build Detected */}
             {!hasJenkinsData ? (
               <div style={{
-                background: '#1F1F1F',
-                borderRadius: '12px',
-                border: '1px solid #333333',
+                background: '#0E111B',
+                borderRadius: '16px',
+                border: '1px solid #1E2230',
                 padding: '48px 36px',
                 textAlign: 'center',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
                 marginBottom: '32px'
               }}>
                 <div style={{
-                  background: '#262626',
-                  color: '#E50914',
+                  background: '#161922',
+                  color: '#F97316',
                   width: '64px',
                   height: '64px',
                   borderRadius: '50%',
@@ -402,29 +582,29 @@ export default function QaTriageDashboard() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 16px auto',
-                  fontSize: '24px',
+                  fontSize: '20px',
                   fontWeight: 900,
-                  border: '1px solid #333333'
+                  border: '1px solid #282D3F'
                 }}>
                   CI/CD
                 </div>
                 <h3 style={{ margin: '0 0 10px 0', fontSize: '22px', fontWeight: 800, color: '#FFFFFF' }}>
                   No Jenkins Pipeline Build Detected
                 </h3>
-                <p style={{ margin: '0 auto 24px auto', fontSize: '14px', color: '#A3A3A3', maxWidth: '640px', lineHeight: 1.6 }}>
+                <p style={{ margin: '0 auto 24px auto', fontSize: '14px', color: '#94A3B8', maxWidth: '640px', lineHeight: 1.6 }}>
                   The AI Triage engine is actively monitoring for automated test report transmissions. No Jenkins CI/CD pipeline run has transmitted test execution logs yet.
                 </p>
 
                 <div style={{
-                  background: '#181818',
-                  border: '1px solid #333333',
-                  borderRadius: '8px',
+                  background: '#141722',
+                  border: '1px solid #1E2230',
+                  borderRadius: '10px',
                   padding: '20px 24px',
                   textAlign: 'left',
                   maxWidth: '620px',
                   margin: '0 auto',
                   fontSize: '13px',
-                  color: '#D4D4D4'
+                  color: '#CBD5E1'
                 }}>
                   <strong style={{ color: '#FFFFFF', display: 'block', marginBottom: '10px', fontSize: '14px' }}>
                     How to Trigger Automated Pipeline Build:
@@ -437,31 +617,30 @@ export default function QaTriageDashboard() {
                 </div>
               </div>
             ) : (
-              /* Scenario B: Jenkins Build Detected */
               <div>
                 {/* Jenkins Detection Alert Banner */}
                 <div style={{
-                  background: '#1F1F1F',
-                  border: '1px solid #E50914',
+                  background: '#0E111B',
+                  border: '1px solid #F97316',
                   color: '#FFFFFF',
                   padding: '20px 28px',
-                  borderRadius: '12px',
+                  borderRadius: '16px',
                   marginBottom: '28px',
-                  boxShadow: '0 8px 24px rgba(229, 9, 20, 0.25)',
+                  boxShadow: '0 6px 20px rgba(249, 115, 22, 0.15)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <div style={{ background: '#E50914', color: '#FFFFFF', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 900 }}>
+                    <div style={{ background: '#F97316', color: '#FFFFFF', width: '48px', height: '48px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900 }}>
                       BUILD
                     </div>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-                        <span style={{ background: '#E50914', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px' }}>
+                        <span style={{ background: '#F97316', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px' }}>
                           JENKINS PIPELINE BUILD DETECTED
                         </span>
-                        <span style={{ fontSize: '12px', color: '#A3A3A3', fontWeight: 600 }}>
+                        <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 600 }}>
                           Timestamp: {summary?.latestJenkinsIngestion?.timestamp || 'Recent Pipeline Run'}
                         </span>
                       </div>
@@ -477,15 +656,15 @@ export default function QaTriageDashboard() {
                       setShowJenkinsAnalysis(true)
                     }}
                     style={{
-                      background: '#E50914',
+                      background: '#F97316',
                       color: '#FFFFFF',
                       border: 'none',
                       padding: '12px 24px',
-                      borderRadius: '6px',
+                      borderRadius: '8px',
                       cursor: 'pointer',
                       fontWeight: 800,
                       fontSize: '14px',
-                      boxShadow: '0 4px 12px rgba(229, 9, 20, 0.4)'
+                      boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)'
                     }}>
                     {showJenkinsAnalysis ? 'Refresh Triage Analysis' : 'View Triage Analysis'}
                   </button>
@@ -494,65 +673,65 @@ export default function QaTriageDashboard() {
                 {/* Show Jenkins Analysis Results */}
                 {(showJenkinsAnalysis || (summary?.latestJenkinsIngestion && summary.latestJenkinsIngestion.acknowledged)) && (
                   <div>
-                    {/* 4 Production KPI Cards */}
+                    {/* 4 KPI Cards */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '28px' }}>
-                      <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Suite Health Index</span>
-                        <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#3B82F6' }}>
+                      <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Suite Health Index</span>
+                        <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#38BDF8' }}>
                           {(summary?.suiteHealthScore || 56.0).toFixed(1)}%
                         </h2>
-                        <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 700 }}>Operational Tracking</span>
+                        <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 700 }}>Operational Tracking</span>
                       </div>
 
-                      <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Genuine Code Defects</span>
-                        <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#E50914' }}>
+                      <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Genuine Code Defects</span>
+                        <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#F43F5E' }}>
                           {categoryCounts.GENUINE_FUNCTIONAL_DEFECT || 0}
                         </h2>
-                        <span style={{ fontSize: '12px', color: '#EF4444', fontWeight: 600 }}>Requiring Dev Fix</span>
+                        <span style={{ fontSize: '12px', color: '#F43F5E', fontWeight: 600 }}>Requiring Dev Fix</span>
                       </div>
 
-                      <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Script / Selector Issues</span>
+                      <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Script / Selector Issues</span>
                         <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#F59E0B' }}>
                           {categoryCounts.TEST_SCRIPT_ISSUE || 0}
                         </h2>
                         <span style={{ fontSize: '12px', color: '#F59E0B', fontWeight: 600 }}>QA Script Locators</span>
                       </div>
 
-                      <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Environment Timeouts</span>
-                        <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#3B82F6' }}>
+                      <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', height: 'auto', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Environment Timeouts</span>
+                        <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#38BDF8' }}>
                           {categoryCounts.ENVIRONMENT_DATA_ISSUE || 0}
                         </h2>
-                        <span style={{ fontSize: '12px', color: '#3B82F6', fontWeight: 600 }}>Infra / Network</span>
+                        <span style={{ fontSize: '12px', color: '#38BDF8', fontWeight: 600 }}>Infra / Network</span>
                       </div>
                     </div>
 
                     {/* Non-Defect Diagnostic Reasoning Section */}
-                    <div style={{ background: '#1F1F1F', borderRadius: '12px', border: '1px solid #333333', padding: '28px', marginBottom: '28px', height: 'auto', overflow: 'hidden' }}>
+                    <div style={{ background: '#0E111B', borderRadius: '16px', border: '1px solid #1E2230', padding: '28px', marginBottom: '28px', height: 'auto', overflow: 'hidden' }}>
                       <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
                         AI Failure Classification Reasoning (Environment, Script Locators & Flakiness)
                       </h3>
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-                        <div style={{ background: '#181818', border: '1px solid #262626', borderRadius: '8px', padding: '20px', height: 'auto', overflow: 'hidden' }}>
-                          <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#60A5FA' }}>Environment & Data Issues ({categoryCounts.ENVIRONMENT_DATA_ISSUE || 0})</h4>
-                          <p style={{ margin: 0, fontSize: '13px', color: '#D4D4D4', lineHeight: 1.6 }}>
+                        <div style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '20px', height: 'auto', overflow: 'hidden' }}>
+                          <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#38BDF8' }}>Environment & Data Issues ({categoryCounts.ENVIRONMENT_DATA_ISSUE || 0})</h4>
+                          <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', lineHeight: 1.6 }}>
                             <strong>Diagnostic Reasoning:</strong> Failure caused by network socket timeouts, database port 5432 refusal, or payment gateway server latency. No code refactoring required — infrastructure auto-recovery.
                           </p>
                         </div>
 
-                        <div style={{ background: '#181818', border: '1px solid #262626', borderRadius: '8px', padding: '20px', height: 'auto', overflow: 'hidden' }}>
-                          <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#FBBF24' }}>Script / Selector Mismatches ({categoryCounts.TEST_SCRIPT_ISSUE || 0})</h4>
-                          <p style={{ margin: 0, fontSize: '13px', color: '#D4D4D4', lineHeight: 1.6 }}>
-                            <strong>Diagnostic Reasoning:</strong> Stale XPath locators (e.g. <code style={{ background: '#262626', padding: '2px 6px', borderRadius: '4px', color: '#F59E0B' }}>//button[@id='transfer-btn']</code>). QA script requires DOM selector update.
+                        <div style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '20px', height: 'auto', overflow: 'hidden' }}>
+                          <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#F59E0B' }}>Script / Selector Mismatches ({categoryCounts.TEST_SCRIPT_ISSUE || 0})</h4>
+                          <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', lineHeight: 1.6 }}>
+                            <strong>Diagnostic Reasoning:</strong> Stale XPath locators (e.g. <code style={{ background: '#1E293B', padding: '2px 6px', borderRadius: '4px', color: '#F59E0B' }}>//button[@id='transfer-btn']</code>). QA script requires DOM selector update.
                           </p>
                         </div>
 
-                        <div style={{ background: '#181818', border: '1px solid #262626', borderRadius: '8px', padding: '20px', height: 'auto', overflow: 'hidden' }}>
-                          <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#A78BFA' }}>Flaky & Quarantined Tests ({categoryCounts.FLAKY_UNSTABLE_TEST || 0})</h4>
-                          <p style={{ margin: 0, fontSize: '13px', color: '#D4D4D4', lineHeight: 1.6 }}>
+                        <div style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '20px', height: 'auto', overflow: 'hidden' }}>
+                          <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#C084FC' }}>Flaky & Quarantined Tests ({categoryCounts.FLAKY_UNSTABLE_TEST || 0})</h4>
+                          <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', lineHeight: 1.6 }}>
                             <strong>Diagnostic Reasoning:</strong> Tests exhibiting state flips between PASS and FAIL across historical runs. Automatically quarantined to prevent pipeline blockage.
                           </p>
                         </div>
@@ -560,42 +739,42 @@ export default function QaTriageDashboard() {
                     </div>
 
                     {/* Human-in-the-Loop Defect Approval Queue */}
-                    <div style={{ background: '#1F1F1F', borderRadius: '12px', border: '1px solid #333333', padding: '28px', height: 'auto', overflow: 'hidden' }}>
+                    <div style={{ background: '#0E111B', borderRadius: '16px', border: '1px solid #1E2230', padding: '28px', height: 'auto', overflow: 'hidden' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div>
                           <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
                             Human-in-the-Loop Jira Defect Approval Queue
                           </h3>
-                          <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#A3A3A3' }}>
+                          <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#94A3B8' }}>
                             Genuine functional defects detected by AI. Review diagnostic reasoning, reproduction steps, and approve to dispatch REST API ticket to Jira Cloud.
                           </p>
                         </div>
-                        <span style={{ background: '#E50914', color: '#FFFFFF', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 800 }}>
+                        <span style={{ background: '#BE123C', color: '#FFFFFF', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 800 }}>
                           {pendingApprovalDrafts.length} Pending Approval
                         </span>
                       </div>
 
                       {pendingApprovalDrafts.length === 0 ? (
-                        <div style={{ background: '#181818', padding: '28px', borderRadius: '8px', textAlign: 'center', color: '#A3A3A3', fontSize: '14px', border: '1px solid #262626' }}>
+                        <div style={{ background: '#121624', padding: '28px', borderRadius: '10px', textAlign: 'center', color: '#94A3B8', fontSize: '14px', border: '1px solid #1E293B' }}>
                           No pending genuine code defects requiring human approval.
                         </div>
                       ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
                           {pendingApprovalDrafts.map((draft) => (
-                            <div key={draft.id} style={{ background: '#181818', border: '1px solid #333333', borderRadius: '10px', padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 'auto', overflow: 'hidden' }}>
+                            <div key={draft.id} style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '12px', padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 'auto', overflow: 'hidden' }}>
                               <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                  <span style={{ background: '#E50914', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
+                                  <span style={{ background: '#F43F5E', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
                                     GENUINE FUNCTIONAL DEFECT
                                   </span>
-                                  <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 700 }}>
+                                  <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 700 }}>
                                     Confidence: {Math.round((draft.confidenceScore || 0.94) * 100)}%
                                   </span>
                                 </div>
                                 <h4 style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 700, color: '#FFFFFF' }}>
                                   {draft.testName}
                                 </h4>
-                                <p style={{ margin: '0 0 14px 0', fontSize: '13px', color: '#D4D4D4', lineHeight: 1.5 }}>
+                                <p style={{ margin: '0 0 14px 0', fontSize: '13px', color: '#CBD5E1', lineHeight: 1.5 }}>
                                   <strong>AI Diagnostic Reasoning:</strong> {draft.writtenReasoning || 'Core banking business logic assertion check failed.'}
                                 </p>
                               </div>
@@ -605,11 +784,11 @@ export default function QaTriageDashboard() {
                                   onClick={() => setSelectedDraft(draft)}
                                   style={{
                                     flex: 1,
-                                    background: '#262626',
-                                    border: '1px solid #404040',
+                                    background: '#1E293B',
+                                    border: '1px solid #334155',
                                     color: '#FFFFFF',
                                     padding: '10px',
-                                    borderRadius: '6px',
+                                    borderRadius: '8px',
                                     fontWeight: 700,
                                     fontSize: '12px',
                                     cursor: 'pointer'
@@ -621,15 +800,15 @@ export default function QaTriageDashboard() {
                                   disabled={submittingId === draft.id}
                                   style={{
                                     flex: 1,
-                                    background: '#E50914',
+                                    background: '#F97316',
                                     color: '#FFFFFF',
                                     border: 'none',
                                     padding: '10px',
-                                    borderRadius: '6px',
-                                    fontWeight: 700,
+                                    borderRadius: '8px',
+                                    fontWeight: 800,
                                     fontSize: '12px',
                                     cursor: 'pointer',
-                                    boxShadow: '0 2px 8px rgba(229, 9, 20, 0.4)'
+                                    boxShadow: '0 2px 8px rgba(249, 115, 22, 0.3)'
                                   }}>
                                   {submittingId === draft.id ? 'Submitting...' : 'Approve & Submit to Jira'}
                                 </button>
@@ -652,9 +831,9 @@ export default function QaTriageDashboard() {
         {activeTab === 'seeded' && (
           <div>
             <div style={{
-              background: '#1F1F1F',
-              borderRadius: '12px',
-              border: '1px solid #333333',
+              background: '#0E111B',
+              borderRadius: '16px',
+              border: '1px solid #1E2230',
               padding: '28px',
               marginBottom: '28px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
@@ -666,7 +845,7 @@ export default function QaTriageDashboard() {
                 <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#FFFFFF' }}>
                   Hand-Labeled Application Benchmark Suite (48 Test Cases)
                 </h3>
-                <p style={{ margin: '6px 0 0 0', fontSize: '13px', color: '#A3A3A3' }}>
+                <p style={{ margin: '6px 0 0 0', fontSize: '13px', color: '#94A3B8' }}>
                   Executes the 48-case benchmark matrix (12 Genuine Defects, 12 Script Issues, 12 Environment Timeouts, 12 Flaky Tests) to evaluate AI classification precision, recall, and F1 score.
                 </p>
               </div>
@@ -675,15 +854,15 @@ export default function QaTriageDashboard() {
                 onClick={runEvaluationHarness}
                 disabled={evalLoading}
                 style={{
-                  background: '#E50914',
+                  background: '#F97316',
                   color: '#FFFFFF',
                   border: 'none',
                   padding: '12px 24px',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   fontWeight: 800,
                   fontSize: '14px',
-                  boxShadow: '0 4px 12px rgba(229, 9, 20, 0.4)'
+                  boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)'
                 }}>
                 {evalLoading ? 'Evaluating 48 Cases...' : 'Re-Run Evaluation Harness'}
               </button>
@@ -691,55 +870,55 @@ export default function QaTriageDashboard() {
 
             {/* Benchmark 4 KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '28px' }}>
-              <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', height: 'auto', overflow: 'hidden' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase' }}>Benchmark Dataset</span>
-                <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#3B82F6' }}>48</h2>
-                <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 700 }}>100.0% Accuracy</span>
+              <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', height: 'auto', overflow: 'hidden' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Benchmark Dataset</span>
+                <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#38BDF8' }}>48</h2>
+                <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 700 }}>100.0% Accuracy</span>
               </div>
 
-              <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', height: 'auto', overflow: 'hidden' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase' }}>Genuine Code Defects</span>
-                <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#E50914' }}>12 / 12</h2>
-                <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 600 }}>100% Precision & Recall</span>
+              <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', height: 'auto', overflow: 'hidden' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Genuine Code Defects</span>
+                <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#F43F5E' }}>12 / 12</h2>
+                <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 600 }}>100% Precision & Recall</span>
               </div>
 
-              <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', height: 'auto', overflow: 'hidden' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase' }}>Script Issues</span>
+              <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', height: 'auto', overflow: 'hidden' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Script Issues</span>
                 <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#F59E0B' }}>12 / 12</h2>
-                <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 600 }}>100% Precision & Recall</span>
+                <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 600 }}>100% Precision & Recall</span>
               </div>
 
-              <div style={{ background: '#1F1F1F', padding: '24px', borderRadius: '12px', border: '1px solid #333333', height: 'auto', overflow: 'hidden' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, color: '#A3A3A3', textTransform: 'uppercase' }}>Environment Timeouts</span>
-                <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#3B82F6' }}>12 / 12</h2>
-                <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 600 }}>100% Precision & Recall</span>
+              <div style={{ background: '#0E111B', padding: '24px', borderRadius: '14px', border: '1px solid #1E2230', height: 'auto', overflow: 'hidden' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>Environment Timeouts</span>
+                <h2 style={{ fontSize: '36px', margin: '10px 0 4px 0', fontWeight: 800, color: '#38BDF8' }}>12 / 12</h2>
+                <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 600 }}>100% Precision & Recall</span>
               </div>
             </div>
 
             {/* Non-Defect Diagnostic Reasoning Section for Seeded Tests */}
-            <div style={{ background: '#1F1F1F', borderRadius: '12px', border: '1px solid #333333', padding: '28px', marginBottom: '28px', height: 'auto', overflow: 'hidden' }}>
+            <div style={{ background: '#0E111B', borderRadius: '16px', border: '1px solid #1E2230', padding: '28px', marginBottom: '28px', height: 'auto', overflow: 'hidden' }}>
               <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
                 AI Diagnostic Reasoning for Seeded Benchmark Categories
               </h3>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-                <div style={{ background: '#181818', border: '1px solid #262626', borderRadius: '8px', padding: '20px' }}>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#60A5FA' }}>Environment Issues (12 Cases)</h4>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#D4D4D4', lineHeight: 1.6 }}>
+                <div style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '20px' }}>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#38BDF8' }}>Environment Issues (12 Cases)</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', lineHeight: 1.6 }}>
                     Connection timeouts, database socket failures on port 5432, network latency.
                   </p>
                 </div>
 
-                <div style={{ background: '#181818', border: '1px solid #262626', borderRadius: '8px', padding: '20px' }}>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#FBBF24' }}>Script / Selector Issues (12 Cases)</h4>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#D4D4D4', lineHeight: 1.6 }}>
-                    Stale DOM XPath locators (e.g. <code style={{ background: '#262626', padding: '2px 6px', borderRadius: '4px', color: '#F59E0B' }}>//button[@id='transfer-btn']</code>).
+                <div style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '20px' }}>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#F59E0B' }}>Script / Selector Issues (12 Cases)</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', lineHeight: 1.6 }}>
+                    Stale DOM XPath locators (e.g. <code style={{ background: '#1E293B', padding: '2px 6px', borderRadius: '4px', color: '#F59E0B' }}>//button[@id='transfer-btn']</code>).
                   </p>
                 </div>
 
-                <div style={{ background: '#181818', border: '1px solid #262626', borderRadius: '8px', padding: '20px' }}>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#A78BFA' }}>Flaky & Quarantined Tests (12 Cases)</h4>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#D4D4D4', lineHeight: 1.6 }}>
+                <div style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '20px' }}>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 700, color: '#C084FC' }}>Flaky & Quarantined Tests (12 Cases)</h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', lineHeight: 1.6 }}>
                     Intermittent pass/fail state flips. Automatically quarantined to protect pipeline stability.
                   </p>
                 </div>
@@ -747,17 +926,17 @@ export default function QaTriageDashboard() {
             </div>
 
             {/* HITL Review Section for Seeded Benchmark Genuine Defects */}
-            <div style={{ background: '#1F1F1F', borderRadius: '12px', border: '1px solid #333333', padding: '28px', marginBottom: '28px', height: 'auto', overflow: 'hidden' }}>
+            <div style={{ background: '#0E111B', borderRadius: '16px', border: '1px solid #1E2230', padding: '28px', marginBottom: '28px', height: 'auto', overflow: 'hidden' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
                     Human-in-the-Loop Jira Defect Approval Queue (Benchmark Cases)
                   </h3>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#A3A3A3' }}>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#94A3B8' }}>
                     Genuine code defects from the hand-labeled benchmark suite. Review AI reasoning and approve to dispatch tickets to Jira Cloud.
                   </p>
                 </div>
-                <span style={{ background: '#E50914', color: '#FFFFFF', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 800 }}>
+                <span style={{ background: '#BE123C', color: '#FFFFFF', padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: 800 }}>
                   12 Genuine Defects
                 </span>
               </div>
@@ -769,20 +948,20 @@ export default function QaTriageDashboard() {
                   { id: 903, testName: 'testCustomAccountBalanceFailure', reasoning: 'Account balance calculation mismatch after P2P transfer execution.' },
                   { id: 904, testName: 'testInvalidAadhaarVerhoeffChecksum', reasoning: 'Enterprise onboarding Aadhaar Verhoeff checksum validation rule failed.' }
                 ].map((item) => (
-                  <div key={item.id} style={{ background: '#181818', border: '1px solid #333333', borderRadius: '10px', padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 'auto', overflow: 'hidden' }}>
+                  <div key={item.id} style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '12px', padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 'auto', overflow: 'hidden' }}>
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <span style={{ background: '#E50914', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
+                        <span style={{ background: '#F43F5E', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
                           GENUINE FUNCTIONAL DEFECT
                         </span>
-                        <span style={{ fontSize: '12px', color: '#22C55E', fontWeight: 700 }}>
+                        <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 700 }}>
                           Confidence: 98%
                         </span>
                       </div>
                       <h4 style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 700, color: '#FFFFFF' }}>
                         {item.testName}
                       </h4>
-                      <p style={{ margin: '0 0 14px 0', fontSize: '13px', color: '#D4D4D4', lineHeight: 1.5 }}>
+                      <p style={{ margin: '0 0 14px 0', fontSize: '13px', color: '#CBD5E1', lineHeight: 1.5 }}>
                         <strong>AI Diagnostic Reasoning:</strong> {item.reasoning}
                       </p>
                     </div>
@@ -800,11 +979,11 @@ export default function QaTriageDashboard() {
                         })}
                         style={{
                           flex: 1,
-                          background: '#262626',
-                          border: '1px solid #404040',
+                          background: '#1E293B',
+                          border: '1px solid #334155',
                           color: '#FFFFFF',
                           padding: '10px',
-                          borderRadius: '6px',
+                          borderRadius: '8px',
                           fontWeight: 700,
                           fontSize: '12px',
                           cursor: 'pointer'
@@ -816,15 +995,15 @@ export default function QaTriageDashboard() {
                         disabled={submittingId === item.id}
                         style={{
                           flex: 1,
-                          background: '#E50914',
+                          background: '#F97316',
                           color: '#FFFFFF',
                           border: 'none',
                           padding: '10px',
-                          borderRadius: '6px',
-                          fontWeight: 700,
+                          borderRadius: '8px',
+                          fontWeight: 800,
                           fontSize: '12px',
                           cursor: 'pointer',
-                          boxShadow: '0 2px 8px rgba(229, 9, 20, 0.4)'
+                          boxShadow: '0 2px 8px rgba(249, 115, 22, 0.3)'
                         }}>
                         {submittingId === item.id ? 'Submitting...' : 'Approve & Submit to Jira'}
                       </button>
@@ -836,7 +1015,7 @@ export default function QaTriageDashboard() {
 
             {/* 4x4 Confusion Matrix & Performance Metrics */}
             {evalResult && (
-              <div style={{ background: '#1F1F1F', borderRadius: '12px', border: '1px solid #333333', padding: '28px', height: 'auto', overflow: 'hidden' }}>
+              <div style={{ background: '#0E111B', borderRadius: '16px', border: '1px solid #1E2230', padding: '28px', height: 'auto', overflow: 'hidden' }}>
                 <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
                   4x4 Classification Confusion Matrix & Performance Metrics
                 </h3>
@@ -844,23 +1023,23 @@ export default function QaTriageDashboard() {
                 <div style={{ overflowX: 'auto', marginBottom: '24px' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', fontSize: '13px' }}>
                     <thead>
-                      <tr style={{ background: '#262626', color: '#FFFFFF' }}>
-                        <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #333333' }}>Expected \ Predicted</th>
-                        <th style={{ padding: '12px', border: '1px solid #333333' }}>GENUINE_DEFECT</th>
-                        <th style={{ padding: '12px', border: '1px solid #333333' }}>SCRIPT_ISSUE</th>
-                        <th style={{ padding: '12px', border: '1px solid #333333' }}>ENVIRONMENT_ISSUE</th>
-                        <th style={{ padding: '12px', border: '1px solid #333333' }}>FLAKY_TEST</th>
+                      <tr style={{ background: '#161922', color: '#FFFFFF' }}>
+                        <th style={{ padding: '12px', textAlign: 'left', border: '1px solid #1E293B' }}>Expected \ Predicted</th>
+                        <th style={{ padding: '12px', border: '1px solid #1E293B' }}>GENUINE_DEFECT</th>
+                        <th style={{ padding: '12px', border: '1px solid #1E293B' }}>SCRIPT_ISSUE</th>
+                        <th style={{ padding: '12px', border: '1px solid #1E293B' }}>ENVIRONMENT_ISSUE</th>
+                        <th style={{ padding: '12px', border: '1px solid #1E293B' }}>FLAKY_TEST</th>
                       </tr>
                     </thead>
                     <tbody>
                       {Object.keys(evalResult.confusionMatrix || {}).map((expectedKey) => (
-                        <tr key={expectedKey} style={{ borderBottom: '1px solid #333333' }}>
-                          <td style={{ padding: '12px', fontWeight: 700, textAlign: 'left', color: '#FFFFFF', border: '1px solid #333333' }}>{expectedKey}</td>
+                        <tr key={expectedKey} style={{ borderBottom: '1px solid #1E293B' }}>
+                          <td style={{ padding: '12px', fontWeight: 700, textAlign: 'left', color: '#FFFFFF', border: '1px solid #1E293B' }}>{expectedKey}</td>
                           {Object.keys(evalResult.confusionMatrix[expectedKey] || {}).map((predKey) => {
                             const val = evalResult.confusionMatrix[expectedKey][predKey]
                             const isMatch = expectedKey === predKey && val > 0
                             return (
-                              <td key={predKey} style={{ padding: '12px', fontWeight: 700, color: isMatch ? '#4ADE80' : '#737373', background: isMatch ? '#14532D' : 'transparent', border: '1px solid #333333' }}>
+                              <td key={predKey} style={{ padding: '12px', fontWeight: 700, color: isMatch ? '#34D399' : '#64748B', background: isMatch ? '#064E3B' : 'transparent', border: '1px solid #1E293B' }}>
                                 {val}
                               </td>
                             )
@@ -871,7 +1050,7 @@ export default function QaTriageDashboard() {
                   </table>
                 </div>
 
-                <div style={{ background: '#181818', border: '1px solid #262626', borderRadius: '8px', padding: '18px', fontSize: '13px', color: '#D4D4D4' }}>
+                <div style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '18px', fontSize: '13px', color: '#CBD5E1' }}>
                   <strong style={{ color: '#FFFFFF' }}>Precision & Recall Metrics:</strong> Genuine Defects (P: 1.00, R: 1.00) • Script Issues (P: 1.00, R: 1.00) • Environment Timeouts (P: 1.00, R: 1.00) • Flaky Tests (P: 1.00, R: 1.00)
                 </div>
               </div>
@@ -885,9 +1064,9 @@ export default function QaTriageDashboard() {
         {activeTab === 'upload' && (
           <div>
             <div style={{
-              background: '#1F1F1F',
-              borderRadius: '12px',
-              border: '1px solid #333333',
+              background: '#0E111B',
+              borderRadius: '16px',
+              border: '1px solid #1E2230',
               padding: '32px',
               marginBottom: '28px',
               boxShadow: '0 4px 16px rgba(0,0,0,0.4)'
@@ -895,8 +1074,8 @@ export default function QaTriageDashboard() {
               <h3 style={{ margin: '0 0 8px 0', fontSize: '20px', fontWeight: 800, color: '#FFFFFF' }}>
                 Custom Test Suite AI Classification & Triage Inspector
               </h3>
-              <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#A3A3A3' }}>
-                Paste or upload your custom JUnit XML (<code style={{ background: '#262626', padding: '2px 6px', borderRadius: '4px', color: '#FFFFFF' }}>TEST-*.xml</code>) or Newman JSON test execution logs to inspect AI failure classification reasoning in real time.
+              <p style={{ margin: '0 0 24px 0', fontSize: '13px', color: '#94A3B8' }}>
+                Paste or upload your custom JUnit XML (<code style={{ background: '#161922', padding: '2px 6px', borderRadius: '4px', color: '#FFFFFF' }}>TEST-*.xml</code>) or Newman JSON test execution logs to inspect AI failure classification reasoning in real time.
               </p>
 
               <textarea
@@ -906,15 +1085,15 @@ export default function QaTriageDashboard() {
                 placeholder="Paste XML content here (e.g. <testsuite name='PaymentSuite'><testcase name='testTransferTimeout'><failure message='java.net.SocketTimeoutException: Connection refused to bank server'/></testcase></testsuite>)..."
                 style={{
                   width: '100%',
-                  borderRadius: '8px',
-                  border: '1px solid #404040',
+                  borderRadius: '10px',
+                  border: '1px solid #282D3F',
                   padding: '16px',
                   fontFamily: 'monospace',
                   fontSize: '13px',
                   color: '#FFFFFF',
                   boxSizing: 'border-box',
                   marginBottom: '20px',
-                  background: '#181818'
+                  background: '#121624'
                 }}
               />
 
@@ -922,15 +1101,15 @@ export default function QaTriageDashboard() {
                 onClick={handleAnalyzeCustomUpload}
                 disabled={uploadLoading || !uploadText.trim()}
                 style={{
-                  background: '#E50914',
+                  background: '#F97316',
                   color: '#FFFFFF',
                   border: 'none',
                   padding: '12px 28px',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   fontWeight: 800,
                   fontSize: '14px',
-                  boxShadow: '0 4px 12px rgba(229, 9, 20, 0.4)'
+                  boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)'
                 }}>
                 {uploadLoading ? 'Analyzing Test Suite...' : 'Analyze Custom Test Suite'}
               </button>
@@ -938,18 +1117,18 @@ export default function QaTriageDashboard() {
 
             {/* Custom Upload Result Display */}
             {uploadResult && (
-              <div style={{ background: '#1F1F1F', borderRadius: '12px', border: '1px solid #333333', padding: '28px', boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}>
+              <div style={{ background: '#0E111B', borderRadius: '16px', border: '1px solid #1E2230', padding: '28px', boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}>
                 <h4 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: 800, color: '#FFFFFF' }}>
                   Uploaded Test Suite AI Classification Results ({uploadResult.totalFailures || 0} Failures Analyzed)
                 </h4>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {(uploadResult.classifications || []).map((item, idx) => (
-                    <div key={idx} style={{ background: '#181818', border: '1px solid #333333', borderRadius: '8px', padding: '20px' }}>
+                    <div key={idx} style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '10px', padding: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                         <span style={{ fontWeight: 700, fontSize: '15px', color: '#FFFFFF' }}>{item.testName}</span>
                         <span style={{
-                          background: item.category === 'GENUINE_FUNCTIONAL_DEFECT' ? '#E50914' : item.category === 'TEST_SCRIPT_ISSUE' ? '#F59E0B' : '#3B82F6',
+                          background: item.category === 'GENUINE_FUNCTIONAL_DEFECT' ? '#F43F5E' : item.category === 'TEST_SCRIPT_ISSUE' ? '#F59E0B' : '#38BDF8',
                           color: '#FFFFFF',
                           padding: '4px 12px',
                           borderRadius: '4px',
@@ -959,11 +1138,11 @@ export default function QaTriageDashboard() {
                           {item.category}
                         </span>
                       </div>
-                      <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#D4D4D4', lineHeight: 1.5 }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#CBD5E1', lineHeight: 1.5 }}>
                         <strong>Diagnostic Reasoning:</strong> {item.writtenReasoning}
                       </p>
                       {item.reproductionSteps && (
-                        <p style={{ margin: 0, fontSize: '13px', color: '#A3A3A3', lineHeight: 1.5 }}>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#94A3B8', lineHeight: 1.5 }}>
                           <strong>Reproduction Steps:</strong> {item.reproductionSteps}
                         </p>
                       )}
@@ -977,44 +1156,44 @@ export default function QaTriageDashboard() {
 
       </div>
 
-      {/* Production Preview Draft Message Modal (Formatted User-Facing Message) */}
+      {/* Production Preview Draft Message Modal */}
       {selectedDraft && formattedModalMessage && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: '#1F1F1F', border: '1px solid #333333', borderRadius: '12px', maxWidth: '680px', width: '90%', padding: '32px', height: 'auto', overflow: 'hidden', boxShadow: '0 12px 36px rgba(0,0,0,0.8)' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(6px)' }}>
+          <div style={{ background: '#0E111B', border: '1px solid #1E2230', borderRadius: '16px', maxWidth: '680px', width: '90%', padding: '32px', height: 'auto', overflow: 'hidden', boxShadow: '0 12px 36px rgba(0,0,0,0.8)' }}>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #333333', paddingBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #1E2230', paddingBottom: '16px' }}>
               <div>
-                <span style={{ background: '#E50914', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
+                <span style={{ background: '#F43F5E', color: '#FFFFFF', padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 800 }}>
                   JIRA DEFECT DRAFT REPORT
                 </span>
                 <h3 style={{ margin: '8px 0 0 0', color: '#FFFFFF', fontSize: '18px', fontWeight: 800 }}>
                   {formattedModalMessage.summary}
                 </h3>
               </div>
-              <button onClick={() => setSelectedDraft(null)} style={{ background: 'none', border: 'none', color: '#A3A3A3', cursor: 'pointer', fontSize: '20px', fontWeight: 700 }}>✕</button>
+              <button onClick={() => setSelectedDraft(null)} style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '20px', fontWeight: 700 }}>✕</button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px', background: '#181818', padding: '16px', borderRadius: '8px', border: '1px solid #262626' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px', background: '#121624', padding: '16px', borderRadius: '10px', border: '1px solid #1E293B' }}>
               <div>
-                <span style={{ fontSize: '11px', color: '#A3A3A3', fontWeight: 700, textTransform: 'uppercase' }}>Target Project</span>
+                <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase' }}>Target Project</span>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#FFFFFF', fontWeight: 600 }}>{formattedModalMessage.projectKey}</p>
               </div>
               <div>
-                <span style={{ fontSize: '11px', color: '#A3A3A3', fontWeight: 700, textTransform: 'uppercase' }}>Issue Type & Priority</span>
+                <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase' }}>Issue Type & Priority</span>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#FFFFFF', fontWeight: 600 }}>{formattedModalMessage.issueType} • Priority: {formattedModalMessage.priority}</p>
               </div>
             </div>
 
             <div style={{ marginBottom: '18px' }}>
-              <span style={{ fontSize: '12px', color: '#A3A3A3', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>AI Diagnostic Reasoning</span>
-              <p style={{ margin: 0, fontSize: '13px', color: '#E5E5E5', background: '#181818', padding: '14px', borderRadius: '8px', border: '1px solid #262626', lineHeight: 1.5 }}>
+              <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>AI Diagnostic Reasoning</span>
+              <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', background: '#121624', padding: '14px', borderRadius: '10px', border: '1px solid #1E293B', lineHeight: 1.5 }}>
                 {formattedModalMessage.writtenReasoning}
               </p>
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <span style={{ fontSize: '12px', color: '#A3A3A3', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Reproduction Steps</span>
-              <p style={{ margin: 0, fontSize: '13px', color: '#E5E5E5', background: '#181818', padding: '14px', borderRadius: '8px', border: '1px solid #262626', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+              <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Reproduction Steps</span>
+              <p style={{ margin: 0, fontSize: '13px', color: '#CBD5E1', background: '#121624', padding: '14px', borderRadius: '10px', border: '1px solid #1E293B', lineHeight: 1.6, whiteSpace: 'pre-line' }}>
                 {formattedModalMessage.reproductionSteps}
               </p>
             </div>
@@ -1022,12 +1201,12 @@ export default function QaTriageDashboard() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button 
                 onClick={() => setSelectedDraft(null)} 
-                style={{ background: '#262626', border: '1px solid #404040', color: '#FFFFFF', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>
+                style={{ background: '#1E293B', border: '1px solid #334155', color: '#FFFFFF', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>
                 Close Preview
               </button>
               <button 
                 onClick={(e) => handleApproveJiraDraft(selectedDraft.id, selectedDraft.testName, e)} 
-                style={{ background: '#E50914', color: '#FFFFFF', border: 'none', padding: '10px 22px', borderRadius: '6px', cursor: 'pointer', fontWeight: 800, fontSize: '13px', boxShadow: '0 4px 12px rgba(229, 9, 20, 0.4)' }}>
+                style={{ background: '#F97316', color: '#FFFFFF', border: 'none', padding: '10px 22px', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, fontSize: '13px', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)' }}>
                 Approve & Submit to Jira
               </button>
             </div>
@@ -1035,14 +1214,14 @@ export default function QaTriageDashboard() {
         </div>
       )}
 
-      {/* Jira Submission Acknowledgement Modal with Open Jira Button */}
+      {/* Jira Submission Acknowledgement Modal */}
       {jiraModalResult && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: '#1F1F1F', border: '1px solid #333333', borderRadius: '14px', maxWidth: '520px', width: '90%', padding: '32px', textAlign: 'center', boxShadow: '0 12px 36px rgba(0,0,0,0.8)' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, backdropFilter: 'blur(6px)' }}>
+          <div style={{ background: '#0E111B', border: '1px solid #1E2230', borderRadius: '16px', maxWidth: '520px', width: '90%', padding: '32px', textAlign: 'center', boxShadow: '0 12px 36px rgba(0,0,0,0.8)' }}>
             
             <div style={{
-              background: jiraModalResult.status === 'success' ? '#1C2E20' : '#3B1719',
-              color: jiraModalResult.status === 'success' ? '#22C55E' : '#EF4444',
+              background: jiraModalResult.status === 'success' ? '#064E3B' : '#7F1D1D',
+              color: jiraModalResult.status === 'success' ? '#34D399' : '#FCA5A5',
               width: '56px',
               height: '56px',
               borderRadius: '50%',
@@ -1050,9 +1229,9 @@ export default function QaTriageDashboard() {
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 16px auto',
-              fontSize: '20px',
+              fontSize: '18px',
               fontWeight: 900,
-              border: '1px solid ' + (jiraModalResult.status === 'success' ? '#22C55E' : '#EF4444')
+              border: '1px solid ' + (jiraModalResult.status === 'success' ? '#10B981' : '#F87171')
             }}>
               {jiraModalResult.status === 'submitting' ? '...' : jiraModalResult.status === 'success' ? 'OK' : 'ERR'}
             </div>
@@ -1061,28 +1240,28 @@ export default function QaTriageDashboard() {
               {jiraModalResult.status === 'submitting' ? 'Submitting to Jira Cloud...' : jiraModalResult.status === 'success' ? 'Jira Issue Ticket Created!' : 'Submission Exception'}
             </h3>
 
-            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#A3A3A3' }}>
+            <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#94A3B8' }}>
               Test: <strong style={{ color: '#FFFFFF' }}>{jiraModalResult.testName}</strong>
             </p>
 
             {jiraModalResult.status === 'success' && (
-              <div style={{ background: '#181818', border: '1px solid #22C55E', padding: '16px', borderRadius: '8px', marginBottom: '24px' }}>
-                <span style={{ fontSize: '12px', color: '#A3A3A3', display: 'block', marginBottom: '4px' }}>Jira Issue Ticket Key</span>
-                <strong style={{ fontSize: '18px', color: '#4ADE80', letterSpacing: '1px' }}>{jiraModalResult.ticketKey}</strong>
+              <div style={{ background: '#121624', border: '1px solid #10B981', padding: '16px', borderRadius: '10px', marginBottom: '24px' }}>
+                <span style={{ fontSize: '12px', color: '#94A3B8', display: 'block', marginBottom: '4px' }}>Jira Issue Ticket Key</span>
+                <strong style={{ fontSize: '18px', color: '#34D399', letterSpacing: '1px' }}>{jiraModalResult.ticketKey}</strong>
               </div>
             )}
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button 
                 onClick={() => setJiraModalResult(null)} 
-                style={{ background: '#262626', border: '1px solid #404040', color: '#FFFFFF', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>
+                style={{ background: '#1E293B', border: '1px solid #334155', color: '#FFFFFF', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>
                 Close
               </button>
 
               {jiraModalResult.status === 'success' && (
                 <button 
                   onClick={() => window.open(jiraModalResult.jiraUrl || 'https://ramadev-bank.atlassian.net/jira/software/projects/KAN/boards/2', '_blank')} 
-                  style={{ background: '#E50914', color: '#FFFFFF', border: 'none', padding: '10px 22px', borderRadius: '6px', cursor: 'pointer', fontWeight: 800, fontSize: '13px', boxShadow: '0 4px 12px rgba(229, 9, 20, 0.4)' }}>
+                  style={{ background: '#F97316', color: '#FFFFFF', border: 'none', padding: '10px 22px', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, fontSize: '13px', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)' }}>
                   Open in Jira Cloud
                 </button>
               )}
