@@ -962,10 +962,126 @@ export default function QaTriageDashboard() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
                 {[
-                  { id: 901, testName: 'testTransferAmountExceedsBalanceFailure', reasoning: 'Ledger overdraft protection rule check failed.' },
-                  { id: 902, testName: 'testInvalidMpinRejectionFailure', reasoning: 'Authentication security rule failed to lock account after 3 invalid attempts.' },
-                  { id: 903, testName: 'testCustomAccountBalanceFailure', reasoning: 'Account balance calculation mismatch after P2P transfer execution.' },
-                  { id: 904, testName: 'testInvalidAadhaarVerhoeffChecksum', reasoning: 'Enterprise onboarding Aadhaar Verhoeff checksum validation rule failed.' }
+                  {
+                    id: 901,
+                    testName: 'testTransferAmountExceedsBalanceFailure',
+                    reasoning: 'Ledger overdraft protection rule check failed. The payment processing service allowed a transfer of $500.00 from an account with only $200.00 available balance, causing an illegal negative balance (-$300.00).',
+                    rootCause: 'Missing pre-transfer balance check in TransactionServiceImpl.processUpiTransfer().',
+                    recommendedAction: 'Add atomic balance validation before executing debit transaction.',
+                    evidence: ['HTTP 200 OK returned on overdraw', 'Resulting balance is -$300.00', 'Overdraft flag set to true'],
+                    contradictingEvidence: ['Expected HTTP 409 Conflict', 'Expected TransactionRejectedException'],
+                    confidence: '98%'
+                  },
+                  {
+                    id: 902,
+                    testName: 'testInvalidMpinRejectionFailure',
+                    reasoning: 'Authentication security rule failed to lock account after 3 consecutive invalid MPIN attempts. The system allowed additional login attempts without triggering mandatory 24-hour lockout protection.',
+                    rootCause: 'Failed attempt counter (mpin_failed_attempts) not incremented in AuthService during MPIN verification failure.',
+                    recommendedAction: 'Increment counter on bad MPIN and set mpin_locked_until when failed attempts count reaches 3.',
+                    evidence: ['3 consecutive invalid MPIN attempts logged', 'User status remained ACTIVE', 'No lockout timestamp set'],
+                    contradictingEvidence: ['Expected account status LOCKED', 'Expected HTTP 423 Locked'],
+                    confidence: '98%'
+                  },
+                  {
+                    id: 903,
+                    testName: 'testCustomAccountBalanceFailure',
+                    reasoning: 'Account balance calculation mismatch after P2P transfer execution. Depositing $10,000.00 resulted in an ending balance of $8,500.00 due to an unnotified fee deduction.',
+                    rootCause: 'Hardcoded $1,500 convenience fee deducted without user notification or fee configuration flag.',
+                    recommendedAction: 'Update AccountService.deposit() to credit full deposit amount without arbitrary deductions.',
+                    evidence: ['Deposit request amount: $10,000.00', 'Credited account balance: $8,500.00', 'Fee ledger entry missing'],
+                    contradictingEvidence: ['Expected credited balance: $10,000.00'],
+                    confidence: '98%'
+                  },
+                  {
+                    id: 904,
+                    testName: 'testInvalidAadhaarVerhoeffChecksum',
+                    reasoning: 'Enterprise onboarding accepted an invalid 12-digit Aadhaar number (299999999999) that fails the dihedral group D5 Verhoeff algorithm checksum validation.',
+                    rootCause: 'Verhoeff checksum validator bypassed during high-volume enterprise signup processing.',
+                    recommendedAction: 'Enforce @ValidAadhaar annotation check across all AuthController signup endpoints.',
+                    evidence: ['Aadhaar provided: 299999999999', 'Verhoeff D5 check digit evaluation failed', 'Account provisioned with HTTP 201'],
+                    contradictingEvidence: ['Expected HTTP 409 Conflict', 'Expected ChecksumValidationException'],
+                    confidence: '98%'
+                  },
+                  {
+                    id: 905,
+                    testName: 'testCreateSavingsAccountDuplicatePanConflict',
+                    reasoning: 'Customer registration allowed creation of a second savings account using a PAN number (ABCDE1234F) already registered to another active customer.',
+                    rootCause: 'Unique constraint check missing on users.pan_number during initial signup request payload validation.',
+                    recommendedAction: 'Add userRepository.existsByPanNumber() check in AuthServiceImpl.signUp().',
+                    evidence: ['Existing user registered with PAN ABCDE1234F', 'Second signup payload submitted with same PAN', 'Account created with HTTP 201'],
+                    contradictingEvidence: ['Expected HTTP 409 Conflict', 'Expected DuplicatePanException'],
+                    confidence: '97%'
+                  },
+                  {
+                    id: 906,
+                    testName: 'testDailyTransactionLimitExceededRejection',
+                    reasoning: 'Payment engine processed a $75,000.00 transfer exceeding the customer daily limits of $50,000.00 without requiring secondary OTP step-up authentication.',
+                    rootCause: 'Daily accumulated transaction sum aggregation missing in TransactionService.',
+                    recommendedAction: 'Query transactionRepository.findSumByAccountAndDate() and reject if total exceeds daily limit.',
+                    evidence: ['Customer daily limit: $50,000.00', 'Transfer request amount: $75,000.00', 'Transaction status: APPROVED'],
+                    contradictingEvidence: ['Expected HTTP 403 Forbidden', 'Expected DailyLimitExceededException'],
+                    confidence: '99%'
+                  },
+                  {
+                    id: 907,
+                    testName: 'testMpinLockoutDurationExpiration',
+                    reasoning: 'Security lockout mechanism unlocked an MPIN-locked account after 10 minutes instead of enforcing the mandatory 24-hour cooling period.',
+                    rootCause: 'Timestamp comparison in AuthService.isAccountLocked() evaluated seconds instead of milliseconds.',
+                    recommendedAction: 'Fix unit conversion in timestamp delta logic in AuthService.',
+                    evidence: ['Account locked at T=0', 'Access granted at T+10min', 'Lockout duration configured for 24 hours'],
+                    contradictingEvidence: ['Expected access denied until T+24h'],
+                    confidence: '96%'
+                  },
+                  {
+                    id: 908,
+                    testName: 'testNegativeAmountTransferRejection',
+                    reasoning: 'Financial transaction API accepted a negative transfer amount (-$500.00), reversing funds flow and improperly crediting the sender account.',
+                    rootCause: 'Missing @Positive validation constraint on PaymentRequest.amount field.',
+                    recommendedAction: 'Add @DecimalMin(value = "0.01") annotation to PaymentRequest DTO.',
+                    evidence: ['Transfer amount: -$500.00', 'Sender balance increased by $500.00', 'HTTP 200 OK returned'],
+                    contradictingEvidence: ['Expected HTTP 400 Bad Request', 'Expected InvalidAmountException'],
+                    confidence: '99%'
+                  },
+                  {
+                    id: 909,
+                    testName: 'testDuplicateTransactionIdIdempotencyFailure',
+                    reasoning: 'Core banking ledger processed a duplicate payment request with identical transaction ID (TXN-998877), double-debiting customer account.',
+                    rootCause: 'Idempotency key lookup cache check missing prior to ledger insertion.',
+                    recommendedAction: 'Implement DB / Redis idempotency check in TransactionService.',
+                    evidence: ['Transaction ID: TXN-998877', 'Request payload submitted twice', 'Two debit entries written to ledger'],
+                    contradictingEvidence: ['Expected HTTP 409 Conflict on second request'],
+                    confidence: '98%'
+                  },
+                  {
+                    id: 910,
+                    testName: 'testInterestCalculationSavingsAccount',
+                    reasoning: 'End-of-month interest calculation applied an annual percentage rate of 2.5% instead of the mandated 4.0% APY rate.',
+                    rootCause: 'Outdated APY constant 0.025 in InterestCalculationJob.java.',
+                    recommendedAction: 'Update SAVINGS_INTEREST_RATE constant to 0.040 in application properties.',
+                    evidence: ['Principal balance: $100,000.00', 'Calculated interest: $208.33', 'Mandated APY: 4.0%'],
+                    contradictingEvidence: ['Expected interest: $333.33'],
+                    confidence: '97%'
+                  },
+                  {
+                    id: 911,
+                    testName: 'testCifNumberGenerationUniqueness',
+                    reasoning: 'Customer Information File (CIF) generator produced duplicate CIF numbers (CIF-100045) for two distinct onboarded customers under concurrent load.',
+                    rootCause: 'Non-atomic sequence generator in CifGeneratorService under multi-threaded execution.',
+                    recommendedAction: 'Replace in-memory sequence counter with PostgreSQL DB sequence (cif_number_seq).',
+                    evidence: ['Customer A CIF: CIF-100045', 'Customer B CIF: CIF-100045', 'Concurrent signup requests executed'],
+                    contradictingEvidence: ['Expected unique CIF number per customer'],
+                    confidence: '98%'
+                  },
+                  {
+                    id: 912,
+                    testName: 'testLoanDisbursementAccountStatusCheck',
+                    reasoning: 'Loan processing module disbursed loan funds ($25,000.00) into a FROZEN / INACTIVE bank account, violating credit compliance policies.',
+                    rootCause: 'Account status validation (AccountStatus.ACTIVE) missing prior to loan credit dispatch.',
+                    recommendedAction: 'Add account status check in LoanService.disburseLoan() before crediting funds.',
+                    evidence: ['Account status: FROZEN', 'Disbursed loan amount: $25,000.00', 'Transaction status: SUCCESS'],
+                    contradictingEvidence: ['Expected HTTP 409 Conflict', 'Expected AccountFrozenException'],
+                    confidence: '99%'
+                  }
                 ].map((item) => (
                   <div key={item.id} style={{ background: '#121624', border: '1px solid #1E293B', borderRadius: '12px', padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 'auto', overflow: 'hidden' }}>
                     <div>
@@ -974,18 +1090,48 @@ export default function QaTriageDashboard() {
                           GENUINE FUNCTIONAL DEFECT
                         </span>
                         <span style={{ fontSize: '12px', color: '#10B981', fontWeight: 700 }}>
-                          Confidence: 98%
+                          Confidence: {item.confidence}
                         </span>
                       </div>
                       <h4 style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 700, color: '#FFFFFF' }}>
                         {item.testName}
                       </h4>
-                      <p style={{ margin: '0 0 14px 0', fontSize: '13px', color: '#CBD5E1', lineHeight: 1.5 }}>
+                      <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#CBD5E1', lineHeight: 1.5 }}>
                         <strong>AI Diagnostic Reasoning:</strong> {item.reasoning}
                       </p>
+
+                      <div style={{ background: '#090A0F', border: '1px solid #1E293B', borderRadius: '8px', padding: '12px', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '12px', color: '#F43F5E', fontWeight: 700, marginBottom: '4px' }}>
+                          🔍 Root Cause Analysis:
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#E2E8F0', lineHeight: 1.4 }}>
+                          {item.rootCause}
+                        </div>
+
+                        <div style={{ fontSize: '12px', color: '#38BDF8', fontWeight: 700, margin: '8px 0 4px 0' }}>
+                          🛠 Recommended Action for Dev/QA:
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#E2E8F0', lineHeight: 1.4 }}>
+                          {item.recommendedAction}
+                        </div>
+                      </div>
+
+                      {/* Evidence Chips */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
+                        {item.evidence.map((ev, idx) => (
+                          <span key={idx} style={{ background: '#064E3B', color: '#34D399', border: '1px solid #10B981', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                            ✓ {ev}
+                          </span>
+                        ))}
+                        {item.contradictingEvidence.map((cev, idx) => (
+                          <span key={idx} style={{ background: '#4C0519', color: '#FDA4AF', border: '1px solid #F43F5E', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                            ✕ {cev}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '14px' }}>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
                       <button
                         onClick={() => setSelectedDraft({
                           id: item.id,
@@ -993,8 +1139,8 @@ export default function QaTriageDashboard() {
                           category: 'GENUINE_FUNCTIONAL_DEFECT',
                           confidenceScore: 0.98,
                           writtenReasoning: item.reasoning,
-                          reproductionSteps: '1. Initialize transaction API call\n2. Pass invalid request parameter\n3. Verify response HTTP 400 rejection',
-                          jiraDraftPayload: JSON.stringify({ fields: { summary: `[Defect] Automated Test Failed: ${item.testName}` } })
+                          reproductionSteps: `1. Execute ${item.testName}\n2. Root Cause: ${item.rootCause}\n3. Verify Fix: ${item.recommendedAction}`,
+                          jiraDraftPayload: JSON.stringify({ fields: { summary: `[Defect] ${item.testName}: ${item.rootCause}` } })
                         })}
                         style={{
                           flex: 1,
