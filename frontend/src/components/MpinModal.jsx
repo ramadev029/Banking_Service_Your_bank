@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 export default function MpinModal({ isOpen, onClose, onSuccessLogin }) {
   const [identifier, setIdentifier] = useState('')
@@ -61,7 +62,7 @@ export default function MpinModal({ isOpen, onClose, onSuccessLogin }) {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:8085/api/v1/auth/mpin/login', {
+      const response = await fetch(`${API_BASE}/api/v1/auth/mpin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier: identifier.trim(), mpin: fullMpin })

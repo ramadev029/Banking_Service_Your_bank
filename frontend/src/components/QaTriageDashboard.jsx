@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE } from '../config'
 
 export default function QaTriageDashboard() {
   const navigate = useNavigate()
@@ -27,7 +28,7 @@ export default function QaTriageDashboard() {
   const fetchDashboardData = async (showLoading = true) => {
     if (showLoading) setLoading(true)
     try {
-      const res = await fetch('http://localhost:8085/api/v1/triage/dashboard-summary')
+      const res = await fetch(`${API_BASE}/api/v1/triage/dashboard-summary`)
       if (res.ok) {
         const data = await res.json()
         setSummary(data)
@@ -42,7 +43,7 @@ export default function QaTriageDashboard() {
   const runEvaluationHarness = async () => {
     setEvalLoading(true)
     try {
-      const res = await fetch('http://localhost:8085/api/v1/triage/evaluation-matrix')
+      const res = await fetch(`${API_BASE}/api/v1/triage/evaluation-matrix`)
       if (res.ok) {
         const data = await res.json()
         setEvalResult(data)
@@ -65,7 +66,7 @@ export default function QaTriageDashboard() {
     })
 
     try {
-      const res = await fetch(`http://localhost:8085/api/v1/triage/approve-jira/${draftId}`, {
+      const res = await fetch(`${API_BASE}/api/v1/triage/approve-jira/${draftId}`, {
         method: 'POST'
       })
       if (res.ok) {
@@ -104,7 +105,7 @@ export default function QaTriageDashboard() {
 
   const handleClearTestData = async () => {
     try {
-      const res = await fetch('http://localhost:8085/api/v1/triage/clear-test-data', { method: 'POST' })
+      const res = await fetch(`${API_BASE}/api/v1/triage/clear-test-data`, { method: 'POST' })
       if (res.ok) {
         setApprovalMessage('Test history and classifications cleared successfully.')
         setShowJenkinsAnalysis(false)
@@ -118,7 +119,7 @@ export default function QaTriageDashboard() {
 
   const handleAcknowledgeJenkinsIngestion = async () => {
     try {
-      await fetch('http://localhost:8085/api/v1/triage/acknowledge-jenkins-ingestion', { method: 'POST' })
+      await fetch(`${API_BASE}/api/v1/triage/acknowledge-jenkins-ingestion`, { method: 'POST' })
       setShowJenkinsAnalysis(true)
       fetchDashboardData(false)
     } catch (e) {
@@ -135,7 +136,7 @@ export default function QaTriageDashboard() {
         ? { jsonContent: uploadText, suiteName: "Custom Uploaded Test Suite" }
         : { xmlContent: uploadText, suiteName: "Custom Uploaded Test Suite" }
 
-      const res = await fetch('http://localhost:8085/api/v1/triage/analyze', {
+      const res = await fetch(`${API_BASE}/api/v1/triage/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

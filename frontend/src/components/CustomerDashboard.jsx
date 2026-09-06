@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation, Navigate } from 'react-router-dom'
+import { API_BASE } from '../config'
 import VirtualCardVisual from './VirtualCardVisual'
 import RazorpayModal from './RazorpayModal'
 import TxnMpinModal from './TxnMpinModal'
@@ -95,7 +96,7 @@ export default function CustomerDashboard({ user, onLogout }) {
     const idToFetch = dashboardData.cifNumber || dashboardData.email
     if (!idToFetch) return
     try {
-      const res = await fetch(`http://localhost:8085/api/v1/customer/dashboard?cifNumber=${idToFetch}`)
+      const res = await fetch(`${API_BASE}/api/v1/customer/dashboard?cifNumber=${idToFetch}`)
       if (res.ok) {
         const updated = await res.json()
         setDashboardData(updated)
@@ -127,7 +128,7 @@ export default function CustomerDashboard({ user, onLogout }) {
     setPaymentError(null)
 
     try {
-      const res = await fetch('http://localhost:8085/api/v1/payments/upi', {
+      const res = await fetch(`${API_BASE}/api/v1/payments/upi`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

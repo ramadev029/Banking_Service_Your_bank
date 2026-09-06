@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { API_BASE } from '../config'
 
 export default function SignUpModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ export default function SignUpModal({ isOpen, onClose }) {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:8085/api/v1/auth/signup', {
+      const response = await fetch(`${API_BASE}/api/v1/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

@@ -18,7 +18,7 @@ public class EvaluatorCustomTest {
         fail("NoSuchElementException: Cannot locate element with xpath //input[@name='accountNumberV2']");
     }
 
-    // 🌐 Test Case 3: Evaluator tests a Network / Server Outage
+    //  Test Case 3: Evaluator tests a Network / Server Outage
     @Test
     void testCustomServerTimeoutFailure() {
         fail("ConnectException: Connection refused to payment server api.yourbank.com:8443");
