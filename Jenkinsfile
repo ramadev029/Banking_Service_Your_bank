@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         APP_NAME = 'yourbank-banking-service'
-        TRIAGE_API_URL = 'http://localhost:8085/api/v1/triage/analyze'
+        TRIAGE_API_URL = 'http://35.154.223.86:8085/api/v1/triage/analyze'
     }
 
     stages {
@@ -48,7 +48,7 @@ pipeline {
     post {
         always {
             echo 'Sending test run metrics & failure logs to AI Triage Assistant Backend...'
-            bat 'powershell -Command "$files = Get-ChildItem -Path Bank_Service/target/surefire-reports/*.xml; foreach($f in $files){ $xml = Get-Content $f.FullName -Raw; $json = @{suiteName=\'Jenkins CI/CD Build\'; xmlContent=$xml} | ConvertTo-Json; Invoke-RestMethod -Uri \'%TRIAGE_API_URL%\' -Method Post -ContentType \'application/json\' -Body $json }"'
+            bat 'powershell -Command "$files = Get-ChildItem -Path Bank_Service/target/surefire-reports/*.xml; foreach($f in $files){ $xml = Get-Content $f.FullName -Raw; $json = @{suiteName=\'Jenkins CI/CD Build\'; xmlContent=$xml} | ConvertTo-Json; try { Invoke-RestMethod -Uri \'http://35.154.223.86:8085/api/v1/triage/analyze\' -Method Post -ContentType \'application/json\' -Body $json } catch {}; try { Invoke-RestMethod -Uri \'http://localhost:8085/api/v1/triage/analyze\' -Method Post -ContentType \'application/json\' -Body $json } catch {} }"'
             cleanWs()
         }
         success {
