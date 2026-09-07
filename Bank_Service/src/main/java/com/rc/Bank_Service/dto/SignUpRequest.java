@@ -62,31 +62,43 @@ public class SignUpRequest {
     }
 
     public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName != null ? fullName.trim() : null; }
 
     public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setEmail(String email) { this.email = email != null ? email.trim().toLowerCase() : null; }
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
     public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) {
+        if (phoneNumber != null) {
+            String clean = phoneNumber.replaceAll("[\\s-]+", "").trim();
+            if (clean.startsWith("+91")) clean = clean.substring(3);
+            this.phoneNumber = clean;
+        } else {
+            this.phoneNumber = null;
+        }
+    }
 
     public String getPanNumber() { return panNumber; }
-    public void setPanNumber(String panNumber) { this.panNumber = panNumber; }
+    public void setPanNumber(String panNumber) {
+        this.panNumber = panNumber != null ? panNumber.replaceAll("[\\s-]+", "").trim().toUpperCase() : null;
+    }
 
     public String getAadhaarNumber() { return aadhaarNumber; }
-    public void setAadhaarNumber(String aadhaarNumber) { this.aadhaarNumber = aadhaarNumber; }
+    public void setAadhaarNumber(String aadhaarNumber) {
+        this.aadhaarNumber = aadhaarNumber != null ? aadhaarNumber.replaceAll("[\\s-]+", "").trim() : null;
+    }
 
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
     public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
+    public void setGender(String gender) { this.gender = gender != null ? gender.trim() : null; }
 
     public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public void setAddress(String address) { this.address = address != null ? address.trim() : null; }
 
     public String getAccountType() { return accountType; }
     public void setAccountType(String accountType) { this.accountType = accountType; }

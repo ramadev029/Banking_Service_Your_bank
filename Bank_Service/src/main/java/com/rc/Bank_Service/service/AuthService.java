@@ -77,9 +77,8 @@ public class AuthService {
             throw new IllegalArgumentException("An account is already registered with PAN Number: " + cleanPan);
         }
 
-        String maskedAadhaar = AESEncryptionUtil.maskAadhaar(cleanAadhaar);
-        if (userRepository.existsByAadhaarNumber(maskedAadhaar)) {
-            throw new IllegalArgumentException("An account is already registered with Aadhaar Number: " + maskedAadhaar);
+        if (userRepository.existsByAadhaarNumber(cleanAadhaar)) {
+            throw new IllegalArgumentException("An account is already registered with Aadhaar Number: " + cleanAadhaar);
         }
 
         // 6. Ensure Flagship Digital Main Branch Exists (Branch Code: 0001, IFSC: YBRK0000001)
@@ -93,9 +92,16 @@ public class AuthService {
                         "560001"
                 )));
 
-        // 7. Generate Sequential Customer CIF ID (CIF-100001)
+        // 7. Generate Sequential Customer CIF ID & Account Number (Collision-Safe)
         long nextSeq = getNextSequenceNumber();
         String cifNumber = "CIF-" + nextSeq;
+        String accountNumber = String.format("000101%06d", nextSeq);
+
+        while (userRepository.findByCifNumber(cifNumber).isPresent() || accountRepository.existsByAccountNumber(accountNumber)) {
+            nextSeq++;
+            cifNumber = "CIF-" + nextSeq;
+            accountNumber = String.format("000101%06d", nextSeq);
+        }
 
         // 8. Hash Password & MPIN (if provided) and Save User Entity
         String hashedPassword = passwordEncoder.encode(request.getPassword());
@@ -106,7 +112,7 @@ public class AuthService {
                 hashedPassword,
                 cleanPhone,
                 cleanPan,
-                maskedAadhaar,
+                cleanAadhaar,
                 request.getDateOfBirth(),
                 request.getGender().trim().toUpperCase(),
                 request.getAddress().trim()
@@ -119,10 +125,16 @@ public class AuthService {
 
         User savedUser = userRepository.save(newUser);
 
-        // 9. Generate Structured 12-Digit Account Number: 0001 (Branch) + 01 (Savings) + Seq(6)
-        String accountNumber = String.format("000101%06d", nextSeq);
+        // 9. Generate Structured 12-Digit Account Number & Unique UPI VPA
         String cleanName = request.getFullName().replaceAll("[^a-zA-Z]", "").toLowerCase();
-        String upiVpa = cleanName + (nextSeq % 10000) + "@ybank";
+        if (cleanName.isEmpty()) cleanName = "user";
+        String baseVpa = cleanName + (nextSeq % 10000);
+        String upiVpa = baseVpa + "@ybank";
+        int vpaSuffix = 1;
+        while (accountRepository.findByUpiVpa(upiVpa).isPresent()) {
+            upiVpa = baseVpa + "_" + vpaSuffix + "@ybank";
+            vpaSuffix++;
+        }
 
         Account newAccount = new Account(
                 savedUser,
@@ -137,8 +149,12 @@ public class AuthService {
 
         Account savedAccount = accountRepository.save(newAccount);
 
-        // 10. Mint Instant 16-Digit Virtual Debit Card
+        // 10. Mint Instant 16-Digit Virtual Debit Card (Collision-Safe)
         String cardNumber = String.format("4532%012d", nextSeq);
+        while (debitCardRepository.existsByCardNumber(cardNumber)) {
+            nextSeq++;
+            cardNumber = String.format("4532%012d", nextSeq);
+        }
         int expiryMonth = LocalDate.now().getMonthValue();
         int expiryYear = LocalDate.now().getYear() + 5;
         String cvv = String.format("%03d", new SecureRandom().nextInt(1000));

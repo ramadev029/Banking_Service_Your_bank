@@ -21,7 +21,9 @@ public class AadhaarOtpRequest {
     }
 
     public String getAadhaarNumber() { return aadhaarNumber; }
-    public void setAadhaarNumber(String aadhaarNumber) { this.aadhaarNumber = aadhaarNumber; }
+    public void setAadhaarNumber(String aadhaarNumber) {
+        this.aadhaarNumber = aadhaarNumber != null ? aadhaarNumber.replaceAll("[\\s-]+", "").trim() : null;
+    }
 
     public String getTxnId() { return txnId; }
     public void setTxnId(String txnId) { this.txnId = txnId; }

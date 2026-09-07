@@ -24,12 +24,13 @@ const p = [
 ]
 
 export function validateAadhaar(aadhaar) {
-  if (!aadhaar || !/^[2-9]{1}[0-9]{11}$/.test(aadhaar)) {
+  const clean = aadhaar ? aadhaar.replace(/[\s-]+/g, '').trim() : ''
+  if (!clean || !/^[2-9]{1}[0-9]{11}$/.test(clean)) {
     return false
   }
 
   let c = 0
-  const myArray = aadhaar.split('').map(Number)
+  const myArray = clean.split('').map(Number)
 
   for (let i = 0; i < myArray.length; i++) {
     c = d[c][p[i % 8][myArray[myArray.length - 1 - i]]]
@@ -39,12 +40,14 @@ export function validateAadhaar(aadhaar) {
 }
 
 export function validatePAN(pan) {
-  return /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan ? pan.toUpperCase() : '')
+  const clean = pan ? pan.replace(/[\s-]+/g, '').toUpperCase().trim() : ''
+  return /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(clean)
 }
 
 export function isIndividualPAN(pan) {
-  if (!validatePAN(pan)) return false
-  return pan.charAt(3).toUpperCase() === 'P'
+  const clean = pan ? pan.replace(/[\s-]+/g, '').toUpperCase().trim() : ''
+  if (!validatePAN(clean)) return false
+  return clean.charAt(3) === 'P'
 }
 
 export function calculateAge(dobString) {

@@ -33,9 +33,17 @@ export default function SignUpPage({ onBackToHome }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target
+    let cleanVal = value
+    if (name === 'panNumber') {
+      cleanVal = value.replace(/[\s-]+/g, '').toUpperCase()
+    } else if (name === 'aadhaarNumber') {
+      cleanVal = value.replace(/[\s-]+/g, '')
+    } else if (name === 'phoneNumber') {
+      cleanVal = value.replace(/[\s-]+/g, '').replace(/^\+91/, '')
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'panNumber' ? value.toUpperCase() : value
+      [name]: cleanVal
     }))
     setError(null)
   }
@@ -167,10 +175,20 @@ export default function SignUpPage({ onBackToHome }) {
     setError(null)
 
     try {
+      const cleanedPayload = {
+        ...formData,
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phoneNumber: formData.phoneNumber.replace(/[\s-]+/g, '').replace(/^\+91/, '').trim(),
+        panNumber: formData.panNumber.replace(/[\s-]+/g, '').toUpperCase().trim(),
+        aadhaarNumber: formData.aadhaarNumber.replace(/[\s-]+/g, '').trim(),
+        address: formData.address.trim()
+      }
+
       const response = await fetch(`${API_BASE}/api/v1/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(cleanedPayload)
       })
 
       const data = await response.json()
