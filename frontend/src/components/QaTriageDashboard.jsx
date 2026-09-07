@@ -686,12 +686,12 @@ export default function QaTriageDashboard() {
                       fontSize: '14px',
                       boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)'
                     }}>
-                    {showJenkinsAnalysis ? 'Refresh Triage Analysis' : 'View Triage Analysis'}
+                    {(showJenkinsAnalysis || recentClassifications.length > 0) ? 'Refresh Triage Analysis' : 'View Triage Analysis'}
                   </button>
                 </div>
 
                 {/* Show Jenkins Analysis Results */}
-                {(showJenkinsAnalysis || (summary?.latestJenkinsIngestion && summary.latestJenkinsIngestion.acknowledged)) && (
+                {(showJenkinsAnalysis || (summary?.latestJenkinsIngestion && summary.latestJenkinsIngestion.acknowledged) || recentClassifications.length > 0) && (
                   <div>
                     {/* 4 KPI Cards */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '28px' }}>
