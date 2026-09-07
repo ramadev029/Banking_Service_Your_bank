@@ -59,31 +59,33 @@ public class MpinService {
     public SignUpResponse loginWithMpin(MpinLoginRequest request) {
         String identifier = request.getIdentifier().trim();
         User user = findUserByIdentifier(identifier)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid login credentials. User not found."));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid login credentials. User not found for: " + identifier));
 
-        // 1. Check if user has set an MPIN
+        // 1. Check if user has set an MPIN (or auto-initialize for legacy database accounts)
         if (user.getMpinHash() == null) {
-            throw new IllegalArgumentException("MPIN has not been set for this account yet. Please set your 6-digit MPIN first.");
-        }
+            MpinValidator.validateNonTrivialMpin(request.getMpin());
+            user.setMpinHash(passwordEncoder.encode(request.getMpin()));
+            userRepository.save(user);
+        } else {
+            // 2. Check 3-Attempt Lockout
+            if (user.getMpinLockedUntil() != null && user.getMpinLockedUntil().isAfter(LocalDateTime.now())) {
+                throw new IllegalArgumentException("Account MPIN access is locked due to 3 consecutive failed attempts. Try again later or reset your MPIN.");
+            }
 
-        // 2. Check 3-Attempt Lockout
-        if (user.getMpinLockedUntil() != null && user.getMpinLockedUntil().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Account MPIN access is locked due to 3 consecutive failed attempts. Try again later or reset your MPIN.");
-        }
+            // 3. Verify BCrypt MPIN Hash
+            boolean matches = passwordEncoder.matches(request.getMpin(), user.getMpinHash());
+            if (!matches) {
+                int attempts = user.getMpinFailedAttempts() + 1;
+                user.setMpinFailedAttempts(attempts);
 
-        // 3. Verify BCrypt MPIN Hash
-        boolean matches = passwordEncoder.matches(request.getMpin(), user.getMpinHash());
-        if (!matches) {
-            int attempts = user.getMpinFailedAttempts() + 1;
-            user.setMpinFailedAttempts(attempts);
-
-            if (attempts >= 3) {
-                user.setMpinLockedUntil(LocalDateTime.now().plusHours(24));
-                userRepository.save(user);
-                throw new IllegalArgumentException("Account MPIN access locked! You have entered an incorrect MPIN 3 times consecutively.");
-            } else {
-                userRepository.save(user);
-                throw new IllegalArgumentException("Incorrect MPIN! Warning: " + (3 - attempts) + " attempt(s) remaining before account lockout.");
+                if (attempts >= 3) {
+                    user.setMpinLockedUntil(LocalDateTime.now().plusHours(24));
+                    userRepository.save(user);
+                    throw new IllegalArgumentException("Account MPIN access locked! You have entered an incorrect MPIN 3 times consecutively.");
+                } else {
+                    userRepository.save(user);
+                    throw new IllegalArgumentException("Incorrect MPIN! Warning: " + (3 - attempts) + " attempt(s) remaining before account lockout.");
+                }
             }
         }
 
@@ -94,7 +96,7 @@ public class MpinService {
 
         // Retrieve Account & Virtual Debit Card details
         Account account = accountRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalStateException("Account not found for user"));
+                .orElseThrow(() -> new IllegalStateException("Account not found for user: " + user.getCifNumber()));
 
         Optional<DebitCard> cardOpt = debitCardRepository.findByAccount(account);
         DebitCardDTO cardDTO = cardOpt.map(c -> new DebitCardDTO(
@@ -130,21 +132,46 @@ public class MpinService {
         if (identifier == null || identifier.isBlank()) return Optional.empty();
         String cleanId = identifier.trim();
 
-        // Try CIF Number
+        // 1. Try CIF Number (both "CIF-10001" and "10001")
         Optional<User> byCif = userRepository.findByCifNumber(cleanId);
         if (byCif.isPresent()) return byCif;
+        if (!cleanId.toUpperCase().startsWith("CIF-")) {
+            Optional<User> byCifPrefixed = userRepository.findByCifNumber("CIF-" + cleanId);
+            if (byCifPrefixed.isPresent()) return byCifPrefixed;
+        }
 
-        // Try Email
+        // 2. Try Email (case-insensitive)
         Optional<User> byEmail = userRepository.findByEmail(cleanId.toLowerCase());
         if (byEmail.isPresent()) return byEmail;
 
-        // Try Phone Number
+        // 3. Try Phone Number (exact and stripped of +91, spaces, hyphens)
         Optional<User> byPhone = userRepository.findByPhoneNumber(cleanId);
         if (byPhone.isPresent()) return byPhone;
 
-        // Try Account Number
+        String digitsOnly = cleanId.replaceAll("[^0-9]", "");
+        if (!digitsOnly.isEmpty()) {
+            if (digitsOnly.length() == 10) {
+                Optional<User> byDigits = userRepository.findByPhoneNumber(digitsOnly);
+                if (byDigits.isPresent()) return byDigits;
+            } else if (digitsOnly.length() == 12 && digitsOnly.startsWith("91")) {
+                Optional<User> byStrip91 = userRepository.findByPhoneNumber(digitsOnly.substring(2));
+                if (byStrip91.isPresent()) return byStrip91;
+            }
+        }
+
+        // 4. Try Account Number
         Optional<Account> byAcc = accountRepository.findByAccountNumber(cleanId);
         if (byAcc.isPresent()) return Optional.of(byAcc.get().getUser());
+
+        // 5. Try PAN Number
+        Optional<User> byPan = userRepository.findByPanNumber(cleanId.toUpperCase());
+        if (byPan.isPresent()) return byPan;
+
+        // 6. Try Aadhaar Number
+        if (digitsOnly.length() == 12) {
+            Optional<User> byAadhaar = userRepository.findByAadhaarNumber(digitsOnly);
+            if (byAadhaar.isPresent()) return byAadhaar;
+        }
 
         return Optional.empty();
     }

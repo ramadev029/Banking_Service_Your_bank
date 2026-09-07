@@ -44,8 +44,28 @@ public class CustomerDashboardService {
         String cleanId = identifier != null ? identifier.trim() : "";
         
         Optional<User> userOpt = userRepository.findByCifNumber(cleanId);
+        if (userOpt.isEmpty() && !cleanId.toUpperCase().startsWith("CIF-")) {
+            userOpt = userRepository.findByCifNumber("CIF-" + cleanId);
+        }
         if (userOpt.isEmpty()) {
-            userOpt = userRepository.findByEmail(cleanId);
+            userOpt = userRepository.findByEmail(cleanId.toLowerCase());
+        }
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByPhoneNumber(cleanId);
+        }
+        if (userOpt.isEmpty()) {
+            String digitsOnly = cleanId.replaceAll("[^0-9]", "");
+            if (digitsOnly.length() == 10) {
+                userOpt = userRepository.findByPhoneNumber(digitsOnly);
+            } else if (digitsOnly.length() == 12 && digitsOnly.startsWith("91")) {
+                userOpt = userRepository.findByPhoneNumber(digitsOnly.substring(2));
+            }
+        }
+        if (userOpt.isEmpty()) {
+            Optional<Account> accOpt = accountRepository.findByAccountNumber(cleanId);
+            if (accOpt.isPresent()) {
+                userOpt = Optional.of(accOpt.get().getUser());
+            }
         }
         
         User user = userOpt.orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + identifier));
